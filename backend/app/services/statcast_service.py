@@ -41,7 +41,7 @@ def get_batter_statcast(mlbam_id: int, start_dt: str, end_dt: str) -> pd.DataFra
     df = pb.statcast_batter(start_dt, end_dt, mlbam_id)
     if df is not None and not df.empty:
         cache.disk_save(key, df)
-    return df or pd.DataFrame()
+    return df if df is not None else pd.DataFrame()
 
 
 def get_pitcher_statcast(mlbam_id: int, start_dt: str, end_dt: str) -> pd.DataFrame:
@@ -54,7 +54,7 @@ def get_pitcher_statcast(mlbam_id: int, start_dt: str, end_dt: str) -> pd.DataFr
     df = pb.statcast_pitcher(start_dt, end_dt, mlbam_id)
     if df is not None and not df.empty:
         cache.disk_save(key, df)
-    return df or pd.DataFrame()
+    return df if df is not None else pd.DataFrame()
 
 
 def get_season_statcast(start_dt: str, end_dt: str, team: Optional[str] = None) -> pd.DataFrame:
@@ -70,7 +70,7 @@ def get_season_statcast(start_dt: str, end_dt: str, team: Optional[str] = None) 
         if team:
             df = df[df["home_team"] == team]
         cache.disk_save(key, df)
-    return df or pd.DataFrame()
+    return df if df is not None else pd.DataFrame()
 
 
 # ---------------------------------------------------------------------------
