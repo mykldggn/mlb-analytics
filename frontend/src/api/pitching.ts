@@ -7,7 +7,7 @@ export const fetchPitchingStats = (playerId: number, season: number) =>
 export const fetchPitchingTrend = (playerId: number, statKey: string, startSeason = 2015, endSeason = CURRENT_SEASON) =>
   get<{ trend: { season: number; value: number | null }[] }>(`/pitching/${playerId}/trend/${statKey}`, { start_season: startSeason, end_season: endSeason })
 
-export const requestPitcherStatcastJob = (playerId: number, startDt: string, endDt: string) =>
+export const requestPitcherStatcastJob = (playerId: number, _startDt: string, _endDt: string) =>
   post<{ job_id: string; status: string }>(`/pitching/${playerId}/statcast`, undefined)
 
 export const fetchPitchMovement = (playerId: number, season: number) =>

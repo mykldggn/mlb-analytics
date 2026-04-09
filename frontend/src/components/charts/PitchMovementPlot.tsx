@@ -1,4 +1,4 @@
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine, Legend } from 'recharts'
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts'
 
 const PITCH_COLORS: Record<string, string> = {
   FF: '#ef4444',  // Four-seam FB — red
@@ -58,7 +58,7 @@ export default function PitchMovementPlot({ pitches }: Props) {
             <Tooltip
               cursor={{ strokeDasharray: '3 3' }}
               contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151', borderRadius: 8 }}
-              formatter={(val, name, props) => {
+              formatter={(_val, _name, props) => {
                 const { payload } = props
                 return [`${payload.type} — H: ${payload.x}″, V: ${payload.y}″, ${payload.speed?.toFixed(1)} mph`, '']
               }}
