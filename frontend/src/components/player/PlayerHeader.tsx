@@ -34,13 +34,13 @@ export default function PlayerHeader({ player }: Props) {
             <span className="text-gray-400 text-sm">{String(player.currentTeam ?? '—')}</span>
             <span className="text-gray-600">·</span>
             <span className="text-gray-400 text-sm">{String(player.primaryPosition ?? '—')}</span>
-            {player.age && (
+            {player.age != null && (
               <>
                 <span className="text-gray-600">·</span>
                 <span className="text-gray-400 text-sm">Age {String(player.age)}</span>
               </>
             )}
-            {player.batSide && (
+            {player.batSide != null && (
               <>
                 <span className="text-gray-600">·</span>
                 <span className="text-gray-400 text-sm">Bats/Throws: {String(player.batSide)}/{String(player.pitchHand ?? '?')}</span>
@@ -48,10 +48,10 @@ export default function PlayerHeader({ player }: Props) {
             )}
           </div>
           <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500">
-            {player.height && <span>{String(player.height)}</span>}
-            {player.weight && <span>{String(player.weight)} lbs</span>}
-            {player.birthCity && <span>{String(player.birthCity)}{player.birthCountry ? `, ${player.birthCountry}` : ''}</span>}
-            {player.mlbDebutDate && <span>Debut: {String(player.mlbDebutDate).slice(0, 4)}</span>}
+            {player.height != null && <span>{String(player.height)}</span>}
+            {player.weight != null && <span>{String(player.weight)} lbs</span>}
+            {player.birthCity != null && <span>{String(player.birthCity)}{player.birthCountry ? `, ${String(player.birthCountry)}` : ''}</span>}
+            {player.mlbDebutDate != null && <span>Debut: {String(player.mlbDebutDate).slice(0, 4)}</span>}
           </div>
         </div>
       </div>

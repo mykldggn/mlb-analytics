@@ -50,8 +50,7 @@ export default function PitchZoneChart({ playerId, season }: { playerId: number;
   // Strike zone borders in grid coords (0-indexed from left/bottom)
   // x: -0.71 to 0.71 ft → roughly cells 1.32 to 3.68 of 5 (edges at -1.5+n*0.6)
   // z: 1.5 to 3.5 ft → roughly rows 0.83 to 4.17 of 5 (edges at 1.0+n*0.6)
-  const szLeft   = (0.71 + 1.5) / 0.6   // ≈3.68
-  const szRight  = (0.71 + 1.5) / 0.6 + (1.42 / 0.6) // wrong, redo properly
+  // szLeft/szRight computed below via szX1/szX2
   // Strike zone in SVG: center x ±0.71 → x_col = (val + 1.5) / 0.6
   // SZ left x = -0.71 → col 1.317; SZ right x = 0.71 → col 3.683
   // SZ bottom z = 1.5 → row from top = (4.0 - 1.5) / 0.6 = 4.167 (rows are top-to-bottom)

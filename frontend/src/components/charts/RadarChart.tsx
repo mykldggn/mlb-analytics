@@ -16,7 +16,6 @@ interface Props { series: Series[] }
 export default function RadarChart({ series }: Props) {
   if (!series.length || !series[0].data.length) return null
 
-  const keys = series[0].data.map(d => d.label)
   const chartData = series[0].data.map((d, i) => {
     const row: Record<string, unknown> = { stat: d.label }
     series.forEach(s => { row[s.label] = s.data[i]?.percentile ?? 0 })
