@@ -69,7 +69,7 @@ export default function HomePage() {
   )
 }
 
-function LeaderCard({ title, statKey, data, lowerIsBetter = false }: {
+function LeaderCard({ title, statKey, data }: {
   title: string; statKey: string; data?: unknown[]; lowerIsBetter?: boolean
 }) {
   return (
@@ -83,7 +83,7 @@ function LeaderCard({ title, statKey, data, lowerIsBetter = false }: {
             <li key={i} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-600 w-4">{i + 1}</span>
-                {entry.headshot_url && (
+                {entry.headshot_url != null && (
                   <img src={String(entry.headshot_url)} alt="" className="w-6 h-6 rounded-full bg-gray-700" />
                 )}
                 {entry.mlbam_id ? (

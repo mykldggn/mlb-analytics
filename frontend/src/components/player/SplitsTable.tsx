@@ -54,7 +54,7 @@ export default function SplitsTable({ splits }: Props) {
               <td className="py-2 pr-4 text-gray-300 font-medium whitespace-nowrap">{split.split_name}</td>
               {COLS.map(c => (
                 <td key={c.key} className="text-right py-2 px-2 font-mono text-gray-300">
-                  {formatStat(c.key, (split as Record<string, unknown>)[c.key] as number)}
+                  {formatStat(c.key, (split as unknown as Record<string, unknown>)[c.key] as number)}
                 </td>
               ))}
             </tr>

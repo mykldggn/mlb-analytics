@@ -45,7 +45,7 @@ function ValueBar({ value, max, color }: { value: number; max: number; color: st
 }
 
 function PlayerTable({
-  players, label, valueKey, valueLabel, higherIsBetter, color,
+  players, label, valueKey, color,
 }: {
   players: ContractPlayer[]
   label: string
