@@ -5,7 +5,6 @@ import { searchPlayers, PlayerSearchResult } from '../api/search'
 import { useDebounce } from '../hooks/useDebounce'
 import { CURRENT_SEASON } from '../utils/constants'
 import PitchZoneChart from '../components/charts/PitchZoneChart'
-import LoadingSpinner from '../components/ui/LoadingSpinner'
 
 const SEASONS = Array.from({ length: 11 }, (_, i) => CURRENT_SEASON - i)
 

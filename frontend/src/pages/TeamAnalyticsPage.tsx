@@ -72,7 +72,7 @@ function pearsonR(data: ScatterPoint[]): number | null {
 }
 
 function TeamScatter({
-  data, xKey, yKey, xLabel, yLabel, title, description,
+  data, xLabel, yLabel, title, description,
 }: {
   data: ScatterPoint[]
   xKey: string
@@ -145,10 +145,10 @@ function TeamScatter({
 }
 
 function LeagueRankTable({
-  rows, statKey, label, lowerIsBetter = false,
+  rows, label, lowerIsBetter = false,
 }: {
   rows: { abbr: string; teamName: string; value: number }[]
-  statKey: string
+  statKey?: string
   label: string
   lowerIsBetter?: boolean
 }) {

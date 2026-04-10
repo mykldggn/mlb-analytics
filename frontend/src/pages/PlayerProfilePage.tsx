@@ -265,7 +265,7 @@ export default function PlayerProfilePage() {
             return (
               <div className="space-y-6">
                 <PitchingStatsTable stats={pitching as Record<string, unknown>} />
-                {(pitching as Record<string, unknown>).pitch_arsenal && (
+                {(pitching as Record<string, unknown>).pitch_arsenal != null && (
                   <PitchArsenalTable arsenal={(pitching as Record<string, unknown>).pitch_arsenal as PitchArsenalEntry[]} />
                 )}
               </div>
@@ -293,7 +293,7 @@ export default function PlayerProfilePage() {
                     ))}
                   </div>
                 )}
-                <SplitsTable splits={splits as Parameters<typeof SplitsTable>[0]['splits']} />
+                <SplitsTable splits={splits as unknown as Parameters<typeof SplitsTable>[0]['splits']} />
               </div>
             )
           }
