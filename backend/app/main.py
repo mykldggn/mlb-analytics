@@ -33,18 +33,18 @@ async def lifespan(app: FastAPI):
 def _warm_cache():
     """Pre-load leaderboard data and Statcast for the top 100 players."""
     import threading
-    from app.services import fangraphs_service
+    from app.services import stats_service
 
     season = settings.CURRENT_SEASON
     bat_df = pit_df = None
 
     try:
-        bat_df = fangraphs_service.get_batting_stats(season, min_pa=50)
+        bat_df = stats_service.get_batting_stats(season, min_pa=50)
         logger.info(f"Batting stats pre-loaded for {season}")
     except Exception as exc:
         logger.warning(f"Could not pre-warm batting stats: {exc}")
     try:
-        pit_df = fangraphs_service.get_pitching_stats(season, min_ip=20)
+        pit_df = stats_service.get_pitching_stats(season, min_ip=20)
         logger.info(f"Pitching stats pre-loaded for {season}")
     except Exception as exc:
         logger.warning(f"Could not pre-warm pitching stats: {exc}")
@@ -60,27 +60,16 @@ def _warm_cache():
 
 def _warm_statcast(bat_df, pit_df, season: int, top_n: int = 100):
     """Fetch and cache Statcast data for the top N batters and pitchers by WAR."""
-    from app.services import fangraphs_service, statcast_service
+    from app.services import statcast_service
     from app.core import cache as disk_cache
 
     start_dt = f"{season}-03-20"
     end_dt   = f"{season}-11-01"
 
-    # Reverse FanGraphs→MLBAM map (handles recent debutants missing from Chadwick)
-    fg_to_mlbam: dict[int, int] = {}
-    try:
-        mlbam_to_fg = fangraphs_service.build_mlbam_to_fangraphs_map()
-        fg_to_mlbam = {v: k for k, v in mlbam_to_fg.items() if v and v > 0}
-    except Exception:
-        pass
-
     def _pid(row) -> int | None:
         raw = row.get("mlbam_id")
         if raw and raw == raw:
             return int(raw)
-        fg = row.get("fangraphs_id")
-        if fg and fg == fg:
-            return fg_to_mlbam.get(int(fg))
         return None
 
     # Top batters

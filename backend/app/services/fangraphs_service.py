@@ -194,42 +194,16 @@ def _apply_name_fallback(df: pd.DataFrame) -> tuple:
 
 
 def get_batting_stats(season: int, min_pa: int = 50) -> pd.DataFrame:
-    """Return normalized + MLBAM-enriched FanGraphs batting stats for a season."""
-    key = f"fg_batting_{season}_{min_pa}"
-    df = cache.disk_get_fresh(key, ttl_hours=settings.FANGRAPHS_CACHE_TTL_HOURS)
-    if df is not None:
-        if "mlbam_id" not in df.columns:
-            logger.info(f"Re-enriching batting cache (no mlbam_id): {season}")
-            df = _enrich_with_mlbam(df)
-            cache.disk_save(key, df)
-        elif df["mlbam_id"].isna().any():
-            # Apply name-based fallback for any null rows (e.g. recent debutants not yet in Chadwick map)
-            df, changed = _apply_name_fallback(df)
-            if changed:
-                cache.disk_save(key, df)
-        logger.info(f"Batting stats cache hit: {season}")
-        return df
-
-    pb = _import_pybaseball()
-    logger.info(f"Fetching FanGraphs batting stats: {season}")
-    raw = pb.batting_stats(season, season, qual=min_pa)
-    df = normalize_df(raw, BATTING_COLUMN_MAP)
-    df = _enrich_with_mlbam(df)
-    cache.disk_save(key, df)
-    return df
+    """Return batting stats for a season. Delegates to stats_service (MLB API + bRef + Savant)."""
+    from app.services.stats_service import get_batting_stats as _get
+    return _get(season, min_pa=min_pa)
 
 
 def get_batting_stats_range(start_dt: str, end_dt: str) -> pd.DataFrame:
-    key = f"fg_batting_range_{start_dt}_{end_dt}"
-    df = cache.disk_get_fresh(key, ttl_hours=settings.FANGRAPHS_CACHE_TTL_HOURS)
-    if df is not None:
-        return df
-    pb = _import_pybaseball()
-    raw = pb.batting_stats_range(start_dt, end_dt)
-    df = normalize_df(raw, BATTING_COLUMN_MAP)
-    df = _enrich_with_mlbam(df)
-    cache.disk_save(key, df)
-    return df
+    """Range batting stats — falls back to current season from stats_service."""
+    season = int(start_dt[:4])
+    from app.services.stats_service import get_batting_stats as _get
+    return _get(season, min_pa=0)
 
 
 def _sanitize_record(record: dict) -> dict:
@@ -286,47 +260,10 @@ def get_player_batting_by_season(
 # Batting — career stats
 # ---------------------------------------------------------------------------
 
-def get_career_batting_stats(fangraphs_id: int, debut_year: int) -> dict:
-    """
-    Career batting stats for a single player using per-season cached FanGraphs data.
-    Returns year-by-year rows AND computed career-aggregate totals.
-    """
-    key = f"career_batting3_{fangraphs_id}_{debut_year}"
-    cached = cache.disk_get_fresh(key, ttl_hours=24 * 7)
-    if cached is not None:
-        records = [_sanitize_record(r) for r in cached.to_dict(orient="records")]
-        career_row = next((r for r in records if r.get("_type") == "career"), {})
-        yby = [r for r in records if r.get("_type") == "season"]
-        return {"year_by_year": yby, "career_totals": career_row}
-
-    start = max(debut_year, 2002)
-    end = settings.CURRENT_SEASON
-
-    year_by_year = get_player_batting_by_season(fangraphs_id, start, end)
-
-    # Compute career totals by summing counting stats
-    career_totals: dict = {}
-    if year_by_year:
-        sum_keys = ["g", "ab", "pa", "h", "singles", "doubles", "triples", "hr",
-                    "r", "rbi", "sb", "cs", "bb", "so", "war"]
-        for k in sum_keys:
-            vals = [r[k] for r in year_by_year if r.get(k) is not None]
-            if vals:
-                career_totals[k] = round(sum(vals), 1)
-        # Carry name/team from last season
-        last = year_by_year[-1]
-        for k in ("name", "team"):
-            if last.get(k) is not None:
-                career_totals[k] = last[k]
-
-    # Cache combined result
-    combined_rows = [{"_type": "season", **r} for r in year_by_year]
-    if career_totals:
-        combined_rows.append({"_type": "career", **career_totals})
-    if combined_rows:
-        cache.disk_save(key, pd.DataFrame(combined_rows))
-
-    return {"year_by_year": year_by_year, "career_totals": career_totals}
+def get_career_batting_stats(mlbam_id: int, debut_year: int = 2000) -> dict:
+    """Career batting stats. Delegates to stats_service using mlbam_id."""
+    from app.services.stats_service import get_career_batting_stats as _get
+    return _get(mlbam_id)
 
 
 # ---------------------------------------------------------------------------
@@ -334,40 +271,16 @@ def get_career_batting_stats(fangraphs_id: int, debut_year: int) -> dict:
 # ---------------------------------------------------------------------------
 
 def get_pitching_stats(season: int, min_ip: int = 20) -> pd.DataFrame:
-    key = f"fg_pitching_{season}_{min_ip}"
-    df = cache.disk_get_fresh(key, ttl_hours=settings.FANGRAPHS_CACHE_TTL_HOURS)
-    if df is not None:
-        if "mlbam_id" not in df.columns:
-            logger.info(f"Re-enriching pitching cache (no mlbam_id): {season}")
-            df = _enrich_with_mlbam(df)
-            cache.disk_save(key, df)
-        elif df["mlbam_id"].isna().any():
-            df, changed = _apply_name_fallback(df)
-            if changed:
-                cache.disk_save(key, df)
-        logger.info(f"Pitching stats cache hit: {season}")
-        return df
-
-    pb = _import_pybaseball()
-    logger.info(f"Fetching FanGraphs pitching stats: {season}")
-    raw = pb.pitching_stats(season, season, qual=min_ip)
-    df = normalize_df(raw, PITCHING_COLUMN_MAP)
-    df = _enrich_with_mlbam(df)
-    cache.disk_save(key, df)
-    return df
+    """Return pitching stats for a season. Delegates to stats_service (MLB API + bRef + Savant)."""
+    from app.services.stats_service import get_pitching_stats as _get
+    return _get(season, min_ip=min_ip)
 
 
 def get_pitching_stats_range(start_dt: str, end_dt: str) -> pd.DataFrame:
-    key = f"fg_pitching_range_{start_dt}_{end_dt}"
-    df = cache.disk_get_fresh(key, ttl_hours=settings.FANGRAPHS_CACHE_TTL_HOURS)
-    if df is not None:
-        return df
-    pb = _import_pybaseball()
-    raw = pb.pitching_stats_range(start_dt, end_dt)
-    df = normalize_df(raw, PITCHING_COLUMN_MAP)
-    df = _enrich_with_mlbam(df)
-    cache.disk_save(key, df)
-    return df
+    """Range pitching stats — falls back to current season from stats_service."""
+    season = int(start_dt[:4])
+    from app.services.stats_service import get_pitching_stats as _get
+    return _get(season, min_ip=0)
 
 
 def get_player_pitching_by_season(
@@ -396,47 +309,10 @@ def get_player_pitching_by_season(
 # Pitching — career stats
 # ---------------------------------------------------------------------------
 
-def get_career_pitching_stats(fangraphs_id: int, debut_year: int) -> dict:
-    """
-    Career pitching stats for a single player using per-season cached FanGraphs data.
-    Returns year-by-year rows AND computed career-aggregate totals.
-    """
-    key = f"career_pitching3_{fangraphs_id}_{debut_year}"
-    cached = cache.disk_get_fresh(key, ttl_hours=24 * 7)
-    if cached is not None:
-        records = [_sanitize_record(r) for r in cached.to_dict(orient="records")]
-        career_row = next((r for r in records if r.get("_type") == "career"), {})
-        yby = [r for r in records if r.get("_type") == "season"]
-        return {"year_by_year": yby, "career_totals": career_row}
-
-    start = max(debut_year, 2002)
-    end = settings.CURRENT_SEASON
-
-    year_by_year = get_player_pitching_by_season(fangraphs_id, start, end)
-
-    # Compute career totals by summing counting stats
-    career_totals: dict = {}
-    if year_by_year:
-        sum_keys = ["g", "gs", "w", "l", "sv", "hld", "h", "r", "er", "hr", "bb", "so", "war"]
-        for k in sum_keys:
-            vals = [r[k] for r in year_by_year if r.get(k) is not None]
-            if vals:
-                career_totals[k] = round(sum(vals), 1)
-        ip_vals = [r["ip"] for r in year_by_year if r.get("ip") is not None]
-        if ip_vals:
-            career_totals["ip"] = round(sum(ip_vals), 1)
-        last = year_by_year[-1]
-        for k in ("name", "team"):
-            if last.get(k) is not None:
-                career_totals[k] = last[k]
-
-    combined_rows = [{"_type": "season", **r} for r in year_by_year]
-    if career_totals:
-        combined_rows.append({"_type": "career", **career_totals})
-    if combined_rows:
-        cache.disk_save(key, pd.DataFrame(combined_rows))
-
-    return {"year_by_year": year_by_year, "career_totals": career_totals}
+def get_career_pitching_stats(mlbam_id: int, debut_year: int = 2000) -> dict:
+    """Career pitching stats. Delegates to stats_service using mlbam_id."""
+    from app.services.stats_service import get_career_pitching_stats as _get
+    return _get(mlbam_id)
 
 
 # ---------------------------------------------------------------------------
@@ -444,24 +320,12 @@ def get_career_pitching_stats(fangraphs_id: int, debut_year: int) -> dict:
 # ---------------------------------------------------------------------------
 
 def get_team_batting_stats(season: int) -> pd.DataFrame:
-    key = f"team_batting_{season}"
-    df = cache.disk_get_fresh(key, ttl_hours=settings.FANGRAPHS_CACHE_TTL_HOURS)
-    if df is not None:
-        return df
-    pb = _import_pybaseball()
-    logger.info(f"Fetching FanGraphs team batting stats: {season}")
-    raw = pb.team_batting(season, season)
-    cache.disk_save(key, raw)
-    return raw
+    """Team batting stats. Delegates to stats_service."""
+    from app.services.stats_service import get_team_batting_stats as _get
+    return _get(season)
 
 
 def get_team_pitching_stats(season: int) -> pd.DataFrame:
-    key = f"team_pitching_{season}"
-    df = cache.disk_get_fresh(key, ttl_hours=settings.FANGRAPHS_CACHE_TTL_HOURS)
-    if df is not None:
-        return df
-    pb = _import_pybaseball()
-    logger.info(f"Fetching FanGraphs team pitching stats: {season}")
-    raw = pb.team_pitching(season, season)
-    cache.disk_save(key, raw)
-    return raw
+    """Team pitching stats. Delegates to stats_service."""
+    from app.services.stats_service import get_team_pitching_stats as _get
+    return _get(season)

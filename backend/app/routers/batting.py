@@ -80,37 +80,9 @@ async def get_batting_trend(
 @router.get("/{player_id}/career")
 async def get_career_batting_stats(player_id: int):
     """Career batting stats (year-by-year + career totals) for a player."""
-    import pandas as pd
-    fg_id = pid_map.get_fangraphs_id(player_id)
-    # -1 means Chadwick has no valid FG ID for this player (e.g. recent debutants)
-    if not fg_id or fg_id <= 0:
-        m = fangraphs_service.build_mlbam_to_fangraphs_map()
-        candidate = m.get(player_id)
-        fg_id = candidate if candidate and candidate > 0 else None
-
-    debut_year = 2000
-    mlb = get_mlb_api_service()
-    try:
-        data = await mlb.get_player(player_id)
-        if data and data.get("mlbDebutDate"):
-            debut_year = int(str(data["mlbDebutDate"])[:4])
-        # Last-resort: find fangraphs_id from current season batting stats by mlbam_id
-        if not fg_id and data:
-            df = fangraphs_service.get_batting_stats(settings.CURRENT_SEASON, min_pa=1)
-            if "mlbam_id" in df.columns and "fangraphs_id" in df.columns:
-                hit = df[df["mlbam_id"].eq(float(player_id)) | df["mlbam_id"].eq(player_id)]
-                if not hit.empty:
-                    raw_fg = hit.iloc[0].get("fangraphs_id")
-                    if raw_fg is not None and raw_fg == raw_fg and int(float(raw_fg)) > 0:
-                        fg_id = int(float(raw_fg))
-    except Exception:
-        pass
-
-    if not fg_id:
-        return {"mlbam_id": player_id, "fangraphs_id": None, "year_by_year": [], "career_totals": {}, "error": "FanGraphs ID not found"}
-
-    result = fangraphs_service.get_career_batting_stats(fg_id, debut_year)
-    return {"mlbam_id": player_id, "fangraphs_id": fg_id, **result}
+    from app.services.stats_service import get_career_batting_stats
+    result = get_career_batting_stats(player_id)
+    return {"mlbam_id": player_id, **result}
 
 
 @router.post("/{player_id}/statcast")
