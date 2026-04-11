@@ -1,7 +1,7 @@
 [build]
-dockerfilePath = "Dockerfile"
+dockerfilePath = "backend/Dockerfile"
 
 [deploy]
 healthcheckPath = "/health"
-healthcheckTimeout = 300   # allow time for startup warmup
+healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
