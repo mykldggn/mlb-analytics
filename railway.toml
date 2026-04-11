@@ -1,6 +1,3 @@
-[settings]
-rootDirectory = "backend"
-
 [build]
 dockerfilePath = "Dockerfile"
 
