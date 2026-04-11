@@ -17,16 +17,34 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: build player ID map, warm leaderboard cache, and start Statcast warmup
+    # Startup: kick off background init and return immediately so health check passes
     logger.info("Starting MLB Analytics API...")
-    await player_id_map.build_map()
     loop = asyncio.get_event_loop()
-    loop.run_in_executor(None, _warm_cache)
+    loop.run_in_executor(None, _background_init)
     yield
     # Shutdown
     from app.services.mlb_api_service import get_mlb_api_service
     await get_mlb_api_service().close()
     logger.info("MLB Analytics API shut down")
+
+
+def _background_init():
+    """
+    Runs in a thread-pool worker after startup so the health check passes immediately.
+    Builds the player ID map (MLB API + optional Chadwick enrichment) then warms
+    leaderboard cache from disk if present.
+    """
+    import asyncio as _asyncio
+
+    # Build the player ID map in a fresh event loop (thread has no loop)
+    try:
+        loop = _asyncio.new_event_loop()
+        loop.run_until_complete(player_id_map.build_map())
+        loop.close()
+    except Exception as exc:
+        logger.warning(f"Player ID map build failed: {exc}")
+
+    _warm_cache()
 
 
 def _warm_cache():
