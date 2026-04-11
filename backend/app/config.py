@@ -15,8 +15,6 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://localhost:3000",
     ]
-    # Set STATCAST_CACHE_DIR=/data/cache in Railway and mount a persistent volume at /data
-    STATCAST_CACHE_DIR: str = "./cache"
 
     class Config:
         env_file = ".env"

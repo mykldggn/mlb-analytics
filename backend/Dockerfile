@@ -1,5 +1,9 @@
 FROM python:3.11-slim
 
+# Ensure Python output is sent straight to Railway logs (no buffering)
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
 WORKDIR /app
 
 # gcc/g++ needed to compile scipy/pyarrow wheels on slim image
