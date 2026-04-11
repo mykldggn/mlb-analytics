@@ -169,31 +169,136 @@ async def get_team_park_factor(season: int, team_abbr: str):
 
 
 async def _compute_and_cache_pfi(season: int, cache_key: str):
-    """Background task: pull multi-year Statcast and compute PFI."""
+    """
+    Background task: compute PFI from MLB API home/away team splits.
+    Uses a 3-year rolling window. Avoids bulk Statcast downloads.
+    """
+    import httpx
     import pandas as pd
-    seasons_used = list(range(max(season - 2, 2015), season + 1))
-    frames = []
-    for s in seasons_used:
-        try:
-            df = get_season_statcast(f"{s}-03-20", f"{s}-11-01")
-            if df is not None and not df.empty:
-                frames.append(df)
-        except Exception as exc:
-            logger.warning(f"Could not fetch Statcast for {s}: {exc}")
+    import numpy as np
+    from app.core.stat_calculations import compute_park_favorability
 
-    if not frames:
-        logger.error("No Statcast data available for PFI computation")
+    MLB_API = "https://statsapi.mlb.com/api/v1"
+    seasons_used = list(range(max(season - 2, 2015), season + 1))
+
+    async def _fetch_team_splits(s: int, sit: str) -> list[dict]:
+        """Fetch all-player hitting stats for a given home/away sitCode, return per-team aggregates."""
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                resp = await client.get(
+                    f"{MLB_API}/stats",
+                    params={
+                        "stats": "statSplits",
+                        "group": "hitting",
+                        "season": s,
+                        "gameType": "R",
+                        "playerPool": "All",
+                        "sitCodes": sit,
+                        "limit": 2000,
+                    },
+                )
+                resp.raise_for_status()
+                data = resp.json()
+        except Exception as exc:
+            logger.warning(f"MLB API home/away splits failed (season={s}, sit={sit}): {exc}")
+            return []
+
+        rows: list[dict] = []
+        for sg in data.get("stats", []):
+            for split in sg.get("splits", []):
+                team = split.get("team", {}).get("abbreviation", "")
+                if not team:
+                    continue
+                stat = split.get("stat", {})
+                h   = int(stat.get("hits", 0) or 0)
+                ab  = int(stat.get("atBats", 0) or 0)
+                pa  = int(stat.get("plateAppearances", 0) or 0)
+                hr  = int(stat.get("homeRuns", 0) or 0)
+                bb  = int(stat.get("baseOnBalls", 0) or 0)
+                so  = int(stat.get("strikeOuts", 0) or 0)
+                sf  = int(stat.get("sacFlies", 0) or 0)
+                r   = int(stat.get("runs", 0) or 0)
+                rows.append({"team": team, "h": h, "ab": ab, "pa": pa,
+                             "hr": hr, "bb": bb, "so": so, "sf": sf, "r": r})
+
+        if not rows:
+            return []
+
+        df = pd.DataFrame(rows).groupby("team").sum().reset_index()
+        return df.to_dict(orient="records")
+
+    # Collect multi-year home and away data per team
+    home_data: dict[str, dict] = {}
+    away_data: dict[str, dict] = {}
+
+    for s in seasons_used:
+        for row in await _fetch_team_splits(s, "h"):
+            t = row["team"]
+            if t not in home_data:
+                home_data[t] = {k: 0 for k in ("h", "ab", "pa", "hr", "bb", "so", "sf", "r")}
+            for k in home_data[t]:
+                home_data[t][k] += row.get(k, 0)
+
+        for row in await _fetch_team_splits(s, "a"):
+            t = row["team"]
+            if t not in away_data:
+                away_data[t] = {k: 0 for k in ("h", "ab", "pa", "hr", "bb", "so", "sf", "r")}
+            for k in away_data[t]:
+                away_data[t][k] += row.get(k, 0)
+
+    if not home_data or not away_data:
+        logger.error("No home/away split data returned from MLB API for PFI computation")
         return
 
-    combined = pd.concat(frames, ignore_index=True)
-    try:
-        result_df = build_park_factors_from_statcast(combined)
-        result_df["park_name"] = result_df["team_abbr"].map(VENUE_NAMES).fillna("Unknown")
-        result_df["interpretation"] = result_df["batter_pfi"].apply(_pfi_interpretation)
-        cache.disk_save(cache_key, result_df)
+    def _rates(d: dict) -> dict:
+        pa = max(d["pa"], 1)
+        ab = max(d["ab"], 1)
+        babip_denom = ab - d["so"] - d["hr"] + d["sf"]
+        babip = (d["h"] - d["hr"]) / max(babip_denom, 1)
+        return {
+            "runs_per_pa": d["r"] / pa,
+            "hr_per_pa":   d["hr"] / pa,
+            "babip":       babip,
+            "k_pct":       d["so"] / pa,
+            "bb_pct":      d["bb"] / pa,
+            "avg_ev":      92.0,  # neutral — no EV data from MLB API splits
+        }
 
-        records = result_df.to_dict(orient="records")
-        cache.memory_set(cache_key, {"seasons_used": seasons_used, "parks": records})
-        logger.info(f"PFI computed for {season} using seasons {seasons_used}")
-    except Exception as exc:
-        logger.error(f"PFI computation failed: {exc}")
+    results = []
+    all_teams = set(home_data) | set(away_data)
+    for team in all_teams:
+        if team not in home_data or team not in away_data:
+            continue
+        h = _rates(home_data[team])
+        a = _rates(away_data[team])
+        if home_data[team]["pa"] < 100 or away_data[team]["pa"] < 100:
+            continue  # skip teams with too little data
+
+        pfi = compute_park_favorability(
+            home_runs_per_pa=h["runs_per_pa"], away_runs_per_pa=a["runs_per_pa"],
+            home_hr_per_pa=h["hr_per_pa"],     away_hr_per_pa=a["hr_per_pa"],
+            home_babip=h["babip"],              away_babip=a["babip"],
+            home_k_pct=h["k_pct"],             away_k_pct=a["k_pct"],
+            home_bb_pct=h["bb_pct"],           away_bb_pct=a["bb_pct"],
+            home_avg_ev=h["avg_ev"],           away_avg_ev=a["avg_ev"],
+        )
+        results.append({
+            "team_abbr":   team,
+            "batter_pfi":  pfi["batter_pfi"],
+            "pitcher_pfi": pfi["pitcher_pfi"],
+            **pfi["components"],
+            "sample_pa":   home_data[team]["pa"],
+        })
+
+    if not results:
+        logger.error("PFI: no teams computed")
+        return
+
+    result_df = pd.DataFrame(results).sort_values("batter_pfi", ascending=False).reset_index(drop=True)
+    result_df["park_name"] = result_df["team_abbr"].map(VENUE_NAMES).fillna("Unknown")
+    result_df["interpretation"] = result_df["batter_pfi"].apply(_pfi_interpretation)
+    cache.disk_save(cache_key, result_df)
+
+    records = result_df.to_dict(orient="records")
+    cache.memory_set(cache_key, {"seasons_used": seasons_used, "parks": records})
+    logger.info(f"PFI computed for {season} using seasons {seasons_used} ({len(results)} parks)")

@@ -921,6 +921,18 @@ def get_team_batting_stats(season: int) -> pd.DataFrame:
 
     agg["WAR"] = agg["war"].round(1)
 
+    # Uppercase aliases expected by the frontend
+    agg["HR"]  = agg["hr"]
+    agg["R"]   = agg["r"]
+    agg["RBI"] = agg["rbi"]
+    agg["SB"]  = agg["sb"]
+    # wRC+ at team level: (wOBA / lg_wOBA) * 100
+    lg_woba = agg["wOBA"].median()
+    if lg_woba and lg_woba > 0:
+        agg["wRC+"] = (agg["wOBA"] / lg_woba * 100).round(1)
+    else:
+        agg["wRC+"] = np.nan
+
     cache.disk_save(key, agg)
     return agg
 

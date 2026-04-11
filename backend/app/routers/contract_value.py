@@ -64,6 +64,24 @@ def _get_lahman_salaries() -> "pd.DataFrame":
     return pd.DataFrame(columns=["playerID", "yearID", "salary"])
 
 
+def _get_bbref_to_mlbam_map() -> dict:
+    """Build {bbref_id: mlbam_id} map from Chadwick register."""
+    import pandas as pd
+    try:
+        from app.services.fangraphs_service import get_chadwick_register
+        df = get_chadwick_register()
+        if df.empty or "key_bbref" not in df.columns or "key_mlbam" not in df.columns:
+            return {}
+        subset = df[["key_bbref", "key_mlbam"]].dropna()
+        subset["key_mlbam"] = pd.to_numeric(subset["key_mlbam"], errors="coerce")
+        subset = subset.dropna()
+        subset["key_mlbam"] = subset["key_mlbam"].astype(int)
+        return dict(zip(subset["key_bbref"].astype(str), subset["key_mlbam"]))
+    except Exception as exc:
+        logger.warning(f"BBRef→MLBAM map failed: {exc}")
+        return {}
+
+
 def _get_bbref_to_fangraphs_map() -> dict:
     """Build {bbref_id: fangraphs_id} map from Chadwick register.
     Lahman playerID matches key_bbref (Baseball Reference ID).
@@ -167,66 +185,29 @@ async def get_contract_value(
             "max_year": max_year,
         }
 
-    # Build BBRef → FanGraphs map (Lahman playerID = BBRef ID)
-    bbref_to_fg = _get_bbref_to_fangraphs_map()
+    # Build BBRef → MLBAM map via Chadwick (Lahman playerID = BBRef ID)
+    bbref_to_mlbam = _get_bbref_to_mlbam_map()
 
-    # Add fangraphs_id to salary rows
     season_salaries = season_salaries.copy()
-    season_salaries["fangraphs_id"] = season_salaries["playerID"].astype(str).map(bbref_to_fg)
-    season_salaries["fangraphs_id"] = pd.to_numeric(season_salaries["fangraphs_id"], errors="coerce")
-    season_salaries = season_salaries.dropna(subset=["fangraphs_id"])
-    season_salaries["fangraphs_id"] = season_salaries["fangraphs_id"].astype(int)
+    season_salaries["mlbam_id"] = season_salaries["playerID"].astype(str).map(bbref_to_mlbam)
+    season_salaries["mlbam_id"] = pd.to_numeric(season_salaries["mlbam_id"], errors="coerce")
+    season_salaries = season_salaries.dropna(subset=["mlbam_id"])
+    season_salaries["mlbam_id"] = season_salaries["mlbam_id"].astype(int)
 
     if season_salaries.empty:
         return {
             "season": season,
             "data_available": False,
-            "message": "Could not cross-reference salary data with FanGraphs IDs.",
+            "message": "Could not cross-reference salary data with player IDs.",
             "players": [],
             "max_year": max_year,
         }
 
-    # Merge on fangraphs_id
-    if "fangraphs_id" not in war_df.columns:
-        return {
-            "season": season,
-            "data_available": False,
-            "message": "FanGraphs ID not available in WAR data.",
-            "players": [],
-            "max_year": max_year,
-        }
-
-    war_df["fangraphs_id"] = pd.to_numeric(war_df["fangraphs_id"], errors="coerce")
-    merged = pd.merge(season_salaries, war_df, on="fangraphs_id", how="inner")
-
-    # For traded players FanGraphs returns team='---'. Resolve to season-end team by fetching
-    # individual team stints (min_pa/ip=1) and taking the last row per player (chronological order).
-    if "team" in merged.columns:
-        traded_ids = pd.to_numeric(
-            merged.loc[merged["team"] == "---", "fangraphs_id"], errors="coerce"
-        ).dropna().astype(int).tolist()
-        if traded_ids:
-            try:
-                if group == "batting":
-                    stints_df = fangraphs_service.get_batting_stats(season, min_pa=1)
-                else:
-                    stints_df = fangraphs_service.get_pitching_stats(season, min_ip=1)
-                if "fangraphs_id" in stints_df.columns and "team" in stints_df.columns:
-                    stints_df = stints_df.copy()
-                    stints_df["fangraphs_id"] = pd.to_numeric(stints_df["fangraphs_id"], errors="coerce")
-                    team_stints = stints_df[
-                        stints_df["fangraphs_id"].isin(traded_ids) &
-                        stints_df["team"].notna() &
-                        (stints_df["team"] != "---")
-                    ]
-                    # FanGraphs lists team stints in order played; last = season-end team
-                    last_team = team_stints.groupby("fangraphs_id")["team"].last().to_dict()
-                    merged["team"] = merged.apply(
-                        lambda r: last_team.get(r["fangraphs_id"], r["team"]) if r["team"] == "---" else r["team"],
-                        axis=1,
-                    )
-            except Exception:
-                pass  # fall back to '---' if lookup fails
+    # Merge on mlbam_id
+    war_df["mlbam_id"] = pd.to_numeric(war_df["mlbam_id"], errors="coerce")
+    war_df = war_df.dropna(subset=["mlbam_id"])
+    war_df["mlbam_id"] = war_df["mlbam_id"].astype(int)
+    merged = pd.merge(season_salaries, war_df, on="mlbam_id", how="inner")
 
     if merged.empty:
         return {
@@ -256,16 +237,16 @@ async def get_contract_value(
     players = []
     for _, row in merged.iterrows():
         mlbam = row.get("mlbam_id")
+        mlbam_int = int(mlbam) if mlbam and mlbam == mlbam else None
         players.append({
             "name": row.get("name", ""),
             "team": row.get("team", ""),
-            "mlbam_id": int(mlbam) if mlbam and mlbam == mlbam else None,
-            "fangraphs_id": int(row["fangraphs_id"]),
+            "mlbam_id": mlbam_int,
             "salary": int(row["salary"]),
             "war": round(float(row["war"]), 1),
             "dollars_per_war": int(row["dollars_per_war"]) if (row.get("dollars_per_war") is not None and row["dollars_per_war"] == row["dollars_per_war"]) else None,
             "war_per_million": float(row["war_per_million"]) if (row.get("war_per_million") is not None and row["war_per_million"] == row["war_per_million"]) else None,
-            "headshot_url": headshot_url(int(mlbam)) if mlbam and mlbam == mlbam else None,
+            "headshot_url": headshot_url(mlbam_int) if mlbam_int else None,
         })
 
     # Sort by best value: highest WAR-per-dollar for positive WAR

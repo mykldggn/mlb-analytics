@@ -1,10 +1,12 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useState, useEffect, useRef } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { searchPlayers, PlayerSearchResult } from '../api/search'
 import { useDebounce } from '../hooks/useDebounce'
 import { CURRENT_SEASON } from '../utils/constants'
+import { post, get } from '../api/client'
 import PitchZoneChart from '../components/charts/PitchZoneChart'
+import LoadingSpinner from '../components/ui/LoadingSpinner'
 
 const SEASONS = Array.from({ length: 11 }, (_, i) => CURRENT_SEASON - i)
 
@@ -13,7 +15,10 @@ export default function PitchZonePage() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [selectedPitcher, setSelectedPitcher] = useState<PlayerSearchResult | null>(null)
   const [season, setSeason] = useState(CURRENT_SEASON)
+  const [triggering, setTriggering] = useState(false)
   const debouncedQuery = useDebounce(query, 300)
+  const queryClient = useQueryClient()
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const { data: results } = useQuery({
     queryKey: ['search-pitcher', debouncedQuery],
@@ -22,10 +27,57 @@ export default function PitchZonePage() {
     staleTime: 60_000,
   })
 
+  // Check current Statcast status for selected pitcher
+  const { data: zoneStatus } = useQuery<{ status: string }>({
+    queryKey: ['pitch-zones', selectedPitcher?.mlbam_id, season, 'all', 'all'],
+    queryFn: () => get(`/pitching/${selectedPitcher!.mlbam_id}/pitch-zones/${season}`, { split: 'all', pitch_type: 'all' }),
+    enabled: !!selectedPitcher,
+    staleTime: 0, // always recheck when pitcher/season changes
+  })
+
+  // Auto-trigger Statcast load when pitcher selected and data not cached
+  useEffect(() => {
+    if (!selectedPitcher || !zoneStatus) return
+    if (zoneStatus.status !== 'not_cached') return
+
+    async function triggerAndPoll() {
+      if (!selectedPitcher) return
+      setTriggering(true)
+      try {
+        const start = `${season}-03-20`
+        const end = `${season}-11-01`
+        await post(`/pitching/${selectedPitcher.mlbam_id}/statcast?start_dt=${start}&end_dt=${end}`)
+      } catch { /* ignore — job may already exist */ }
+
+      // Poll every 8 seconds until data is ready
+      pollRef.current = setInterval(async () => {
+        if (!selectedPitcher) return
+        await queryClient.refetchQueries({
+          queryKey: ['pitch-zones', selectedPitcher.mlbam_id, season, 'all', 'all'],
+        })
+        const current = queryClient.getQueryData(['pitch-zones', selectedPitcher.mlbam_id, season, 'all', 'all']) as { status?: string } | undefined
+        if (current?.status === 'ready') {
+          clearInterval(pollRef.current!)
+          setTriggering(false)
+        }
+      }, 8_000)
+
+      // Stop polling after 3 minutes
+      setTimeout(() => {
+        if (pollRef.current) { clearInterval(pollRef.current); setTriggering(false) }
+      }, 180_000)
+    }
+
+    triggerAndPoll()
+    return () => { if (pollRef.current) clearInterval(pollRef.current) }
+  }, [selectedPitcher?.mlbam_id, season, zoneStatus?.status])
+
   function onSelect(player: PlayerSearchResult) {
     setSelectedPitcher(player)
     setQuery('')
     setDropdownOpen(false)
+    setTriggering(false)
+    if (pollRef.current) clearInterval(pollRef.current)
   }
 
   return (
@@ -35,7 +87,6 @@ export default function PitchZonePage() {
         <h1 className="text-2xl font-bold text-white">Pitch Zone Chart</h1>
         <p className="text-gray-500 text-sm mt-1 max-w-2xl">
           Pitch location frequency heatmap — where pitchers throw by pitch type and batter handedness.
-          Requires Statcast data to be loaded for the selected pitcher and season.
         </p>
       </div>
 
@@ -84,11 +135,7 @@ export default function PitchZonePage() {
       {/* Content */}
       {!selectedPitcher ? (
         <div className="card text-center py-12">
-          <div className="text-4xl mb-3">🎯</div>
           <p className="text-gray-400">Search for a pitcher to view their pitch zone chart.</p>
-          <p className="text-xs text-gray-600 mt-2">
-            Pitch zone data requires Statcast data to be pre-loaded via the pitcher's profile page.
-          </p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -110,21 +157,16 @@ export default function PitchZonePage() {
             </div>
           </div>
 
-          {/* Pitch zone chart */}
-          <div className="card">
-            <PitchZoneChart playerId={selectedPitcher.mlbam_id} season={season} />
-          </div>
-
-          {/* Note about Statcast data */}
-          <div className="card border-amber-900/30 bg-amber-950/10">
-            <p className="text-xs text-amber-400/80">
-              Pitch zone charts require Statcast data to be loaded first. If you see "data not cached," visit{' '}
-              <Link to={`/players/${selectedPitcher.mlbam_id}`} className="underline hover:text-amber-300">
-                {selectedPitcher.fullName}'s profile
-              </Link>
-              {' '}and trigger a Statcast data pull from the Charts tab.
-            </p>
-          </div>
+          {triggering ? (
+            <div className="card flex items-center gap-3 py-6">
+              <LoadingSpinner size="sm" />
+              <span className="text-sm text-gray-400">Loading Statcast data for {selectedPitcher.fullName}… this takes ~30–60 seconds.</span>
+            </div>
+          ) : (
+            <div className="card">
+              <PitchZoneChart playerId={selectedPitcher.mlbam_id} season={season} />
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -8,7 +8,7 @@ import { CURRENT_SEASON, STAT_DEFINITIONS } from '../utils/constants'
 import { post } from '../api/client'
 
 const BATTING_VISIBLE  = ['war', 'wrc_plus', 'woba', 'ops', 'avg', 'hr', 'rbi', 'sb', 'k_pct', 'bb_pct', 'babip', 'iso', 'xba', 'xslg', 'barrel_pct']
-const PITCHING_VISIBLE = ['war', 'era', 'fip', 'xfip', 'siera', 'k_per_9', 'bb_per_9', 'k_bb_ratio', 'whip', 'k_pct', 'swstr_pct', 'csw_pct', 'stuff_plus']
+const PITCHING_VISIBLE = ['war', 'era', 'fip', 'fip_minus', 'era_minus', 'k_per_9', 'bb_per_9', 'k_bb_ratio', 'k_minus_bb_pct', 'whip', 'k_pct', 'bb_pct', 'lob_pct', 'babip']
 
 const PAGE_TABS = [
   { key: 'batting', label: 'Batting' },
