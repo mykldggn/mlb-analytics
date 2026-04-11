@@ -41,8 +41,12 @@ def get_chadwick_register() -> pd.DataFrame:
     key = "chadwick_register"
     cached = cache.disk_get_fresh(key, ttl_hours=24 * 7)
     if cached is not None:
-        _chadwick_cache = cached
-        return _chadwick_cache
+        # Validate required columns — old cache may be missing key_bbref
+        required = {"key_mlbam", "key_fangraphs", "key_bbref"}
+        if required.issubset(set(cached.columns)):
+            _chadwick_cache = cached
+            return _chadwick_cache
+        logger.info("Chadwick cache missing key_bbref — forcing re-download")
 
     pb = _import_pybaseball()
     logger.info("Downloading Chadwick player ID register...")

@@ -170,9 +170,11 @@ async def get_team_park_factor(season: int, team_abbr: str):
 
 async def _compute_and_cache_pfi(season: int, cache_key: str):
     """
-    Background task: compute PFI from MLB API home/away team splits.
+    Background task: compute PFI from MLB API per-team home/away splits.
+    Queries each team individually (30 teams × 2 splits × 3 seasons concurrently).
     Uses a 3-year rolling window. Avoids bulk Statcast downloads.
     """
+    import asyncio
     import httpx
     import pandas as pd
     import numpy as np
@@ -181,73 +183,86 @@ async def _compute_and_cache_pfi(season: int, cache_key: str):
     MLB_API = "https://statsapi.mlb.com/api/v1"
     seasons_used = list(range(max(season - 2, 2015), season + 1))
 
-    async def _fetch_team_splits(s: int, sit: str) -> list[dict]:
-        """Fetch all-player hitting stats for a given home/away sitCode, return per-team aggregates."""
-        try:
-            async with httpx.AsyncClient(timeout=30) as client:
+    # Get all 30 MLB teams once
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.get(f"{MLB_API}/teams", params={"season": season, "sportId": 1})
+            resp.raise_for_status()
+            mlb_teams = [
+                (t["id"], t.get("abbreviation", ""))
+                for t in resp.json().get("teams", [])
+                if t.get("id") and t.get("abbreviation")
+            ]
+    except Exception as exc:
+        logger.error(f"PFI: teams list fetch failed: {exc}")
+        return
+
+    if not mlb_teams:
+        logger.error("PFI: no teams returned from MLB API")
+        return
+
+    _STAT_KEYS = ("h", "ab", "pa", "hr", "bb", "so", "sf", "r")
+
+    async def _fetch_one(client: httpx.AsyncClient, sem: asyncio.Semaphore,
+                         team_id: int, abbr: str, s: int, sit: str) -> tuple:
+        """Return (abbr, sit, stat_dict | None) for one team/season/split."""
+        async with sem:
+            try:
                 resp = await client.get(
-                    f"{MLB_API}/stats",
+                    f"{MLB_API}/teams/{team_id}/stats",
                     params={
                         "stats": "statSplits",
                         "group": "hitting",
                         "season": s,
                         "gameType": "R",
-                        "playerPool": "All",
                         "sitCodes": sit,
-                        "limit": 2000,
                     },
+                    timeout=20,
                 )
                 resp.raise_for_status()
                 data = resp.json()
-        except Exception as exc:
-            logger.warning(f"MLB API home/away splits failed (season={s}, sit={sit}): {exc}")
-            return []
+                for sg in data.get("stats", []):
+                    for split in sg.get("splits", []):
+                        stat = split.get("stat", {})
+                        return (abbr, sit, {
+                            "h":  int(stat.get("hits", 0) or 0),
+                            "ab": int(stat.get("atBats", 0) or 0),
+                            "pa": int(stat.get("plateAppearances", 0) or 0),
+                            "hr": int(stat.get("homeRuns", 0) or 0),
+                            "bb": int(stat.get("baseOnBalls", 0) or 0),
+                            "so": int(stat.get("strikeOuts", 0) or 0),
+                            "sf": int(stat.get("sacFlies", 0) or 0),
+                            "r":  int(stat.get("runs", 0) or 0),
+                        })
+            except Exception as exc:
+                logger.warning(f"PFI split failed ({abbr} {s} {sit}): {exc}")
+        return (abbr, sit, None)
 
-        rows: list[dict] = []
-        for sg in data.get("stats", []):
-            for split in sg.get("splits", []):
-                team = split.get("team", {}).get("abbreviation", "")
-                if not team:
-                    continue
-                stat = split.get("stat", {})
-                h   = int(stat.get("hits", 0) or 0)
-                ab  = int(stat.get("atBats", 0) or 0)
-                pa  = int(stat.get("plateAppearances", 0) or 0)
-                hr  = int(stat.get("homeRuns", 0) or 0)
-                bb  = int(stat.get("baseOnBalls", 0) or 0)
-                so  = int(stat.get("strikeOuts", 0) or 0)
-                sf  = int(stat.get("sacFlies", 0) or 0)
-                r   = int(stat.get("runs", 0) or 0)
-                rows.append({"team": team, "h": h, "ab": ab, "pa": pa,
-                             "hr": hr, "bb": bb, "so": so, "sf": sf, "r": r})
-
-        if not rows:
-            return []
-
-        df = pd.DataFrame(rows).groupby("team").sum().reset_index()
-        return df.to_dict(orient="records")
-
-    # Collect multi-year home and away data per team
+    # Run all requests concurrently (max 10 at a time to avoid rate-limiting)
     home_data: dict[str, dict] = {}
     away_data: dict[str, dict] = {}
 
-    for s in seasons_used:
-        for row in await _fetch_team_splits(s, "h"):
-            t = row["team"]
-            if t not in home_data:
-                home_data[t] = {k: 0 for k in ("h", "ab", "pa", "hr", "bb", "so", "sf", "r")}
-            for k in home_data[t]:
-                home_data[t][k] += row.get(k, 0)
+    async with httpx.AsyncClient(timeout=30) as client:
+        sem = asyncio.Semaphore(10)
+        tasks = [
+            _fetch_one(client, sem, team_id, abbr, s, sit)
+            for s in seasons_used
+            for team_id, abbr in mlb_teams
+            for sit in ("h", "a")
+        ]
+        results = await asyncio.gather(*tasks)
 
-        for row in await _fetch_team_splits(s, "a"):
-            t = row["team"]
-            if t not in away_data:
-                away_data[t] = {k: 0 for k in ("h", "ab", "pa", "hr", "bb", "so", "sf", "r")}
-            for k in away_data[t]:
-                away_data[t][k] += row.get(k, 0)
+    for abbr, sit, stat in results:
+        if stat is None:
+            continue
+        target = home_data if sit == "h" else away_data
+        if abbr not in target:
+            target[abbr] = {k: 0 for k in _STAT_KEYS}
+        for k in _STAT_KEYS:
+            target[abbr][k] += stat.get(k, 0)
 
     if not home_data or not away_data:
-        logger.error("No home/away split data returned from MLB API for PFI computation")
+        logger.error("PFI: no home/away split data accumulated — all API calls may have failed")
         return
 
     def _rates(d: dict) -> dict:

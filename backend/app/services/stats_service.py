@@ -227,7 +227,7 @@ def _savant_expected_stats(season: int, stat_type: str = "batter") -> pd.DataFra
                 col_map[col] = "xwoba"
             elif cl in ("est_obp", "xobp", "expected_obp"):
                 col_map[col] = "xobp"
-            elif "barrel" in cl and "rate" in cl:
+            elif "barrel" in cl:  # barrel_batted_rate, barrel_rate, barrel_pct, etc.
                 col_map[col] = "barrel_pct"
             elif "hard_hit" in cl and "percent" in cl:
                 col_map[col] = "hard_hit_pct"
@@ -524,6 +524,16 @@ def _compute_pitching_derived(df: pd.DataFrame) -> pd.DataFrame:
     if lg_fip and lg_fip > 0:
         df["fip_minus"] = (100 * df["fip"] / lg_fip).round(1)
 
+    # Compute pitcher BABIP = (H - HR) / (BF - BB - SO - HR - HBP)
+    # MLB API often omits this field; derive it from counting stats.
+    babip_denom = df["bf"].astype(float) - bb - so - hr - hbp
+    babip_denom = babip_denom.where(babip_denom > 0, other=np.nan)
+    computed_babip = ((h - hr) / babip_denom).round(3)
+    if "babip" in df.columns:
+        df["babip"] = df["babip"].fillna(computed_babip)
+    else:
+        df["babip"] = computed_babip
+
     return df
 
 
@@ -566,6 +576,18 @@ def get_batting_stats(season: int, min_pa: int = 50) -> pd.DataFrame:
 
         cache.disk_save(full_key, df)
         logger.info(f"Batting stats built: {len(df)} players for {season}")
+
+    # If barrel_pct is missing from a stale cache, merge Savant data now and re-save.
+    if "barrel_pct" not in df.columns:
+        savant_df = _savant_expected_stats(season, "batter")
+        if not savant_df.empty:
+            savant_cols = ["mlbam_id"] + [c for c in savant_df.columns if c != "mlbam_id"]
+            df = df.merge(savant_df[savant_cols], on="mlbam_id", how="left")
+            try:
+                cache.disk_save(full_key, df)
+                logger.info(f"Patched batting cache with Savant stats for {season}")
+            except Exception as exc:
+                logger.warning(f"Could not update batting cache: {exc}")
 
     if min_pa > 0 and "pa" in df.columns:
         df = df[df["pa"] >= min_pa].copy()
@@ -876,6 +898,11 @@ def get_team_batting_stats(season: int) -> pd.DataFrame:
     if df.empty:
         return pd.DataFrame()
 
+    # Ensure war column exists — bRef fetch may have failed
+    if "war" not in df.columns:
+        df = df.copy()
+        df["war"] = np.nan
+
     agg = (
         df.groupby("team")
         .agg(
@@ -947,6 +974,11 @@ def get_team_pitching_stats(season: int) -> pd.DataFrame:
     df = get_pitching_stats(season, min_ip=0)
     if df.empty:
         return pd.DataFrame()
+
+    # Ensure war column exists — bRef fetch may have failed
+    if "war" not in df.columns:
+        df = df.copy()
+        df["war"] = np.nan
 
     agg = (
         df.groupby("team")
