@@ -30,26 +30,38 @@ async def lifespan(app: FastAPI):
 
 
 def _warm_cache():
-    """Pre-load leaderboard data for the current season."""
+    """
+    Pre-load leaderboard data only when it is already on disk.
+    On a cold deploy (empty cache dir) this is a no-op — data loads lazily
+    on the first API request instead, avoiding OOM on startup.
+    """
     import gc
+    from app.core import cache as disk_cache
     from app.services import stats_service
 
     season = settings.CURRENT_SEASON
+    bat_key = f"mlb_batting_full_{season}"
+    pit_key = f"mlb_pitching_full_{season}"
 
-    try:
-        stats_service.get_batting_stats(season, min_pa=50)
-        logger.info(f"Batting stats pre-loaded for {season}")
-    except Exception as exc:
-        logger.warning(f"Could not pre-warm batting stats: {exc}")
+    if disk_cache.disk_exists(bat_key):
+        try:
+            stats_service.get_batting_stats(season, min_pa=50)
+            logger.info(f"Batting stats loaded from cache for {season}")
+        except Exception as exc:
+            logger.warning(f"Batting cache load failed: {exc}")
+    else:
+        logger.info(f"Batting cache absent — will build on first leaderboard request")
 
-    # Release memory before loading pitching
     gc.collect()
 
-    try:
-        stats_service.get_pitching_stats(season, min_ip=20)
-        logger.info(f"Pitching stats pre-loaded for {season}")
-    except Exception as exc:
-        logger.warning(f"Could not pre-warm pitching stats: {exc}")
+    if disk_cache.disk_exists(pit_key):
+        try:
+            stats_service.get_pitching_stats(season, min_ip=20)
+            logger.info(f"Pitching stats loaded from cache for {season}")
+        except Exception as exc:
+            logger.warning(f"Pitching cache load failed: {exc}")
+    else:
+        logger.info(f"Pitching cache absent — will build on first leaderboard request")
 
     gc.collect()
 
