@@ -49,28 +49,33 @@ async def get_team_analytics(
     Combined team batting WAR, pitching WAR, and win/loss records for a season.
     Used by the Team Historical Analytics page to surface correlations.
     """
+    import asyncio
     from app.services.fangraphs_service import get_team_batting_stats, get_team_pitching_stats
 
-    # FanGraphs team stats
+    # Run synchronous stat builds in a thread to avoid blocking the event loop
+    loop = asyncio.get_event_loop()
+
     batting_records = []
     pitching_records = []
     errors = []
     try:
-        bat_df = get_team_batting_stats(season)
+        bat_df = await loop.run_in_executor(None, lambda: get_team_batting_stats(season))
         batting_records = [{k: (None if v != v else v) for k, v in r.items()} for r in bat_df.to_dict(orient="records")]
         logger.info(f"Team batting: {len(batting_records)} teams for {season}")
     except Exception as exc:
+        import traceback
         msg = f"Team batting stats failed for {season}: {exc}"
-        logger.warning(msg)
+        logger.error(msg + "\n" + traceback.format_exc())
         errors.append(msg)
 
     try:
-        pit_df = get_team_pitching_stats(season)
+        pit_df = await loop.run_in_executor(None, lambda: get_team_pitching_stats(season))
         pitching_records = [{k: (None if v != v else v) for k, v in r.items()} for r in pit_df.to_dict(orient="records")]
         logger.info(f"Team pitching: {len(pitching_records)} teams for {season}")
     except Exception as exc:
+        import traceback
         msg = f"Team pitching stats failed for {season}: {exc}"
-        logger.warning(msg)
+        logger.error(msg + "\n" + traceback.format_exc())
         errors.append(msg)
 
     # Build team_id → abbreviation map from the teams endpoint

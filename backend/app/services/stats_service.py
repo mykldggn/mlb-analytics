@@ -191,11 +191,72 @@ def _bref_war_pitch_player(mlbam_id: int) -> dict[int, float]:
 # Baseball Savant expected stats leaderboard
 # ---------------------------------------------------------------------------
 
+def _savant_statcast_leaderboard(season: int, stat_type: str = "batter") -> pd.DataFrame:
+    """
+    Fetch Baseball Savant statcast leaderboard CSV — includes barrel_batted_rate, hard_hit_percent, avg EV.
+    This is a DIFFERENT endpoint from expected_statistics (which only has xBA/xSLG/xwOBA).
+    stat_type: 'batter' or 'pitcher'
+    """
+    key = f"savant_statcast_lb_{stat_type}_{season}"
+    cached = cache.disk_get_fresh(key, ttl_hours=settings.FANGRAPHS_CACHE_TTL_HOURS)
+    if cached is not None:
+        return cached
+
+    url = (
+        f"https://baseballsavant.mlb.com/leaderboard/statcast"
+        f"?type={stat_type}&year={season}&position=&team=&min=1&csv=true"
+    )
+    try:
+        resp = httpx.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
+        resp.raise_for_status()
+        df = pd.read_csv(io.StringIO(resp.text))
+        if df.empty:
+            return pd.DataFrame()
+
+        col_map: dict[str, str] = {}
+        for col in df.columns:
+            cl = col.lower().strip()
+            if cl in ("player_id", "mlbam_id", "batter", "pitcher"):
+                col_map[col] = "mlbam_id"
+            elif "barrel" in cl:
+                col_map[col] = "barrel_pct"
+            elif "hard_hit" in cl and ("percent" in cl or "pct" in cl or cl.endswith("_pct") or cl.endswith("_percent")):
+                col_map[col] = "hard_hit_pct"
+            elif cl in ("exit_velocity_avg", "avg_hit_speed", "launch_speed_avg"):
+                col_map[col] = "avg_ev"
+            elif cl in ("launch_angle_avg", "avg_hit_angle"):
+                col_map[col] = "avg_la"
+
+        df = df.rename(columns=col_map)
+        keep = [c for c in ("mlbam_id", "barrel_pct", "hard_hit_pct", "avg_ev", "avg_la")
+                if c in df.columns]
+        if "mlbam_id" not in keep:
+            return pd.DataFrame()
+
+        df = df[keep].copy()
+        df["mlbam_id"] = pd.to_numeric(df["mlbam_id"], errors="coerce")
+        df = df.dropna(subset=["mlbam_id"])
+        df["mlbam_id"] = df["mlbam_id"].astype(int)
+        # Convert barrel_pct from percentage (e.g. 8.5) to decimal (0.085) if needed
+        if "barrel_pct" in df.columns:
+            bp = pd.to_numeric(df["barrel_pct"], errors="coerce")
+            # Savant returns values like 8.5 (percent); normalize to 0–1
+            if bp.dropna().median() > 1:
+                bp = bp / 100
+            df["barrel_pct"] = bp.round(4)
+        cache.disk_save(key, df)
+        logger.info(f"Savant statcast leaderboard ({stat_type} {season}): {len(df)} players, barrel_pct included={('barrel_pct' in df.columns)}")
+        return df
+    except Exception as exc:
+        logger.warning(f"Savant statcast leaderboard fetch failed ({stat_type} {season}): {exc}")
+        return pd.DataFrame()
+
+
 def _savant_expected_stats(season: int, stat_type: str = "batter") -> pd.DataFrame:
     """
     Fetch Baseball Savant expected stats CSV leaderboard.
     stat_type: 'batter' or 'pitcher'
-    Returns DataFrame with mlbam_id + xba, xslg, xwoba, barrel_pct, hard_hit_pct, avg_ev, avg_la
+    Returns DataFrame with mlbam_id + xba, xslg, xwoba (NOT barrel_pct — use _savant_statcast_leaderboard for that)
     """
     key = f"savant_expected_{stat_type}_{season}"
     cached = cache.disk_get_fresh(key, ttl_hours=settings.FANGRAPHS_CACHE_TTL_HOURS)
@@ -567,17 +628,26 @@ def get_batting_stats(season: int, min_pa: int = 50) -> pd.DataFrame:
         else:
             df["war"] = np.nan
 
-        # Merge Savant expected stats
+        # Merge Savant expected stats (xBA, xSLG, xwOBA)
         savant_df = _savant_expected_stats(season, "batter")
         if not savant_df.empty:
             df = df.merge(savant_df, on="mlbam_id", how="left")
             matched = int(df.get("xba", pd.Series(dtype=float)).notna().sum())
             logger.info(f"Savant xStats merged (batting {season}): {matched}/{len(df)} players")
 
+        # Merge Savant statcast leaderboard (barrel%, hard_hit%, avg_ev)
+        # This is a DIFFERENT endpoint — expected_statistics does NOT include barrel_pct
+        statcast_lb = _savant_statcast_leaderboard(season, "batter")
+        if not statcast_lb.empty:
+            lb_cols = [c for c in statcast_lb.columns if c not in df.columns and c != "mlbam_id"]
+            if lb_cols:
+                df = df.merge(statcast_lb[["mlbam_id"] + lb_cols], on="mlbam_id", how="left")
+                logger.info(f"Savant statcast LB merged (batting {season}): barrel_pct included={('barrel_pct' in df.columns)}")
+
         cache.disk_save(full_key, df)
         logger.info(f"Batting stats built: {len(df)} players for {season}")
 
-    # Repair any duplicate columns from a bad previous cache write (e.g. double Savant merge)
+    # Repair any duplicate columns from a bad previous cache write
     if df.columns.duplicated().any():
         df = df.loc[:, ~df.columns.duplicated()].copy()
         try:
@@ -586,20 +656,19 @@ def get_batting_stats(season: int, min_pa: int = 50) -> pd.DataFrame:
         except Exception:
             pass
 
-    # If barrel_pct is missing from a stale cache, merge ONLY the missing Savant columns.
-    # Never re-merge columns that already exist — that creates xba_x/xba_y duplicates.
+    # If barrel_pct is still missing (statcast LB fetch failed), patch now with only missing cols
     if "barrel_pct" not in df.columns:
-        savant_df = _savant_expected_stats(season, "batter")
-        if not savant_df.empty:
-            missing = [c for c in savant_df.columns if c not in df.columns and c != "mlbam_id"]
+        statcast_lb = _savant_statcast_leaderboard(season, "batter")
+        if not statcast_lb.empty:
+            missing = [c for c in statcast_lb.columns if c not in df.columns and c != "mlbam_id"]
             if missing:
-                df = df.merge(savant_df[["mlbam_id"] + missing], on="mlbam_id", how="left")
+                df = df.merge(statcast_lb[["mlbam_id"] + missing], on="mlbam_id", how="left")
             else:
                 df = df.copy()
                 df["barrel_pct"] = np.nan
             try:
                 cache.disk_save(full_key, df)
-                logger.info(f"Patched batting cache with Savant stats for {season}")
+                logger.info(f"Patched batting cache with statcast LB for {season}")
             except Exception as exc:
                 logger.warning(f"Could not update batting cache: {exc}")
 
