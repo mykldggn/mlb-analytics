@@ -577,12 +577,26 @@ def get_batting_stats(season: int, min_pa: int = 50) -> pd.DataFrame:
         cache.disk_save(full_key, df)
         logger.info(f"Batting stats built: {len(df)} players for {season}")
 
-    # If barrel_pct is missing from a stale cache, merge Savant data now and re-save.
+    # Repair any duplicate columns from a bad previous cache write (e.g. double Savant merge)
+    if df.columns.duplicated().any():
+        df = df.loc[:, ~df.columns.duplicated()].copy()
+        try:
+            cache.disk_save(full_key, df)
+            logger.info(f"Fixed duplicate columns in batting cache for {season}")
+        except Exception:
+            pass
+
+    # If barrel_pct is missing from a stale cache, merge ONLY the missing Savant columns.
+    # Never re-merge columns that already exist — that creates xba_x/xba_y duplicates.
     if "barrel_pct" not in df.columns:
         savant_df = _savant_expected_stats(season, "batter")
         if not savant_df.empty:
-            savant_cols = ["mlbam_id"] + [c for c in savant_df.columns if c != "mlbam_id"]
-            df = df.merge(savant_df[savant_cols], on="mlbam_id", how="left")
+            missing = [c for c in savant_df.columns if c not in df.columns and c != "mlbam_id"]
+            if missing:
+                df = df.merge(savant_df[["mlbam_id"] + missing], on="mlbam_id", how="left")
+            else:
+                df = df.copy()
+                df["barrel_pct"] = np.nan
             try:
                 cache.disk_save(full_key, df)
                 logger.info(f"Patched batting cache with Savant stats for {season}")
