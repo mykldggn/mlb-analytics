@@ -218,7 +218,9 @@ def _savant_statcast_leaderboard(season: int, stat_type: str = "batter") -> pd.D
             cl = col.lower().strip()
             if cl in ("player_id", "mlbam_id", "batter", "pitcher"):
                 col_map[col] = "mlbam_id"
-            elif "barrel" in cl:
+            elif cl in ("barrel_batted_rate", "barrel_rate", "brl_percent", "brls_per_bbe_formatted",
+                        "barrel_pct", "brl_pa", "brls_per_pa"):
+                # Only map the RATE column, not the raw barrel count column ("barrel")
                 col_map[col] = "barrel_pct"
             elif "hard_hit" in cl and ("percent" in cl or "pct" in cl or cl.endswith("_pct") or cl.endswith("_percent")):
                 col_map[col] = "hard_hit_pct"
@@ -288,7 +290,9 @@ def _savant_expected_stats(season: int, stat_type: str = "batter") -> pd.DataFra
                 col_map[col] = "xwoba"
             elif cl in ("est_obp", "xobp", "expected_obp"):
                 col_map[col] = "xobp"
-            elif "barrel" in cl:  # barrel_batted_rate, barrel_rate, barrel_pct, etc.
+            elif cl in ("barrel_batted_rate", "barrel_rate", "brl_percent", "brls_per_bbe_formatted",
+                        "barrel_pct", "brl_pa", "brls_per_pa"):
+                # Only map the RATE column, not the raw barrel count column ("barrel")
                 col_map[col] = "barrel_pct"
             elif "hard_hit" in cl and "percent" in cl:
                 col_map[col] = "hard_hit_pct"
@@ -318,11 +322,46 @@ def _savant_expected_stats(season: int, stat_type: str = "batter") -> pd.DataFra
 
 
 # ---------------------------------------------------------------------------
+# MLB Stats API — helpers
+# ---------------------------------------------------------------------------
+
+def _get_team_id_to_abbr(season: int) -> dict:
+    """Return {team_id: abbreviation} from the MLB Teams endpoint.
+    The /stats splits only include team.id and team.name, not abbreviation,
+    so we need a separate lookup.
+    """
+    key = f"mlb_team_abbr_map_{season}"
+    cached = cache.disk_get_fresh(key, ttl_hours=24 * 7)
+    if cached is not None and not cached.empty:
+        return dict(zip(cached["id"].astype(int), cached["abbreviation"]))
+    try:
+        resp = httpx.get(
+            f"{MLB_API_BASE}/teams",
+            params={"sportId": 1, "season": season},
+            timeout=20,
+        )
+        resp.raise_for_status()
+        teams = resp.json().get("teams", [])
+        rows = [{"id": t["id"], "abbreviation": t.get("abbreviation", t.get("name", ""))}
+                for t in teams if t.get("id")]
+        if rows:
+            df = pd.DataFrame(rows)
+            cache.disk_save(key, df)
+            return dict(zip(df["id"].astype(int), df["abbreviation"]))
+    except Exception as exc:
+        logger.warning(f"Team abbreviation map fetch failed for {season}: {exc}")
+    return {}
+
+
+# ---------------------------------------------------------------------------
 # MLB Stats API — batting season
 # ---------------------------------------------------------------------------
 
 def _mlb_batting_season(season: int) -> pd.DataFrame:
     """Pull all batter season stats from MLB Stats API (paginated)."""
+    # The /stats splits include team.id but NOT team.abbreviation; fetch separately
+    team_abbr_map = _get_team_id_to_abbr(season)
+
     rows: list[dict] = []
     offset = 0
     limit = 500
@@ -362,6 +401,11 @@ def _mlb_batting_season(season: int) -> pd.DataFrame:
             if not mlbam_id:
                 continue
 
+            team_id = team.get("id")
+            team_abbr = (team.get("abbreviation")
+                         or (team_abbr_map.get(team_id) if team_id else None)
+                         or "")
+
             h   = int(stat.get("hits", 0) or 0)
             ab  = int(stat.get("atBats", 0) or 0)
             pa  = int(stat.get("plateAppearances", 0) or 0)
@@ -379,7 +423,7 @@ def _mlb_batting_season(season: int) -> pd.DataFrame:
             rows.append({
                 "mlbam_id": int(mlbam_id),
                 "name":     player.get("fullName", ""),
-                "team":     team.get("abbreviation", ""),
+                "team":     team_abbr,
                 "g":   int(stat.get("gamesPlayed", 0) or 0),
                 "ab":  ab,
                 "pa":  pa,
@@ -462,6 +506,9 @@ def _compute_batting_derived(df: pd.DataFrame, season: int) -> pd.DataFrame:
 
 def _mlb_pitching_season(season: int) -> pd.DataFrame:
     """Pull all pitcher season stats from MLB Stats API (paginated)."""
+    # The /stats splits include team.id but NOT team.abbreviation; fetch separately
+    team_abbr_map = _get_team_id_to_abbr(season)
+
     rows: list[dict] = []
     offset = 0
     limit = 500
@@ -501,6 +548,11 @@ def _mlb_pitching_season(season: int) -> pd.DataFrame:
             if not mlbam_id:
                 continue
 
+            team_id = team.get("id")
+            team_abbr = (team.get("abbreviation")
+                         or (team_abbr_map.get(team_id) if team_id else None)
+                         or "")
+
             ip  = _ip_to_decimal(stat.get("inningsPitched", "0"))
             bb  = int(stat.get("baseOnBalls", 0) or 0)
             ibb = int(stat.get("intentionalWalks", 0) or 0)
@@ -516,7 +568,7 @@ def _mlb_pitching_season(season: int) -> pd.DataFrame:
             rows.append({
                 "mlbam_id": int(mlbam_id),
                 "name":  player.get("fullName", ""),
-                "team":  team.get("abbreviation", ""),
+                "team":  team_abbr,
                 "g":     int(stat.get("gamesPlayed", 0) or 0),
                 "gs":    int(stat.get("gamesStarted", 0) or 0),
                 "w":     int(stat.get("wins", 0) or 0),
@@ -981,6 +1033,10 @@ def get_team_batting_stats(season: int) -> pd.DataFrame:
     if df.empty:
         return pd.DataFrame()
 
+    unique_teams = df["team"].nunique() if "team" in df.columns else 0
+    sample = df["team"].value_counts().head(5).to_dict() if "team" in df.columns else {}
+    logger.info(f"Team batting groupby: {unique_teams} unique teams in {len(df)}-player df, sample={sample}")
+
     # Ensure war column exists — bRef fetch may have failed
     if "war" not in df.columns:
         df = df.copy()
@@ -1057,6 +1113,9 @@ def get_team_pitching_stats(season: int) -> pd.DataFrame:
     df = get_pitching_stats(season, min_ip=0)
     if df.empty:
         return pd.DataFrame()
+
+    unique_teams = df["team"].nunique() if "team" in df.columns else 0
+    logger.info(f"Team pitching groupby: {unique_teams} unique teams in {len(df)}-pitcher df")
 
     # Ensure war column exists — bRef fetch may have failed
     if "war" not in df.columns:
