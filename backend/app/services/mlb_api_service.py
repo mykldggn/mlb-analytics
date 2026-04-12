@@ -157,27 +157,52 @@ class MLBApiService:
         except Exception:
             return []
         splits_data = resp.json().get("stats", [])
-        results = []
+
+        # For players traded mid-season the API returns one stat group per team stint.
+        # Prefer the combined/total splits (stat groups whose individual splits have no
+        # "team" association). Fall back to all splits if none are team-less.
+        all_splits: list[dict] = []
+        combined_splits: list[dict] = []
         for stat_group in splits_data:
             for split in stat_group.get("splits", []):
-                stat = split.get("stat", {})
-                # Normalize field names from MLB API to match frontend expectations.
-                # Pitching splits use "battersFaced" instead of "plateAppearances".
-                pa_count = (stat.get("plateAppearances") or stat.get("battersFaced") or stat.get("pa"))
-                results.append({
-                    "split_name": split.get("split", {}).get("description", ""),
-                    "split_code": split.get("split", {}).get("code", ""),
-                    "pa": pa_count,
-                    "avg": _parse_pct(stat.get("avg")),
-                    "obp": _parse_pct(stat.get("obp")),
-                    "slg": _parse_pct(stat.get("slg")),
-                    "ops": _parse_pct(stat.get("ops")),
-                    "woba": stat.get("woba"),
-                    "hr": stat.get("homeRuns") or stat.get("hr"),
-                    "rbi": stat.get("rbi"),
-                    "k_pct": _pct_of_pa(stat.get("strikeOuts"), pa_count),
-                    "bb_pct": _pct_of_pa(stat.get("baseOnBalls"), pa_count),
-                })
+                all_splits.append(split)
+                if not split.get("team"):
+                    combined_splits.append(split)
+
+        source = combined_splits if combined_splits else all_splits
+
+        # If there are still duplicates (same split_code appearing from multiple groups),
+        # keep only the entry with the highest PA per split_code.
+        best: dict[str, dict] = {}
+        for split in source:
+            code = split.get("split", {}).get("code", "")
+            stat = split.get("stat", {})
+            pa_count = int(stat.get("plateAppearances") or stat.get("battersFaced") or stat.get("pa") or 0)
+            if code not in best or pa_count > int(
+                best[code]["stat"].get("plateAppearances") or
+                best[code]["stat"].get("battersFaced") or
+                best[code]["stat"].get("pa") or 0
+            ):
+                best[code] = split
+
+        results = []
+        for split in best.values():
+            stat = split.get("stat", {})
+            pa_count = (stat.get("plateAppearances") or stat.get("battersFaced") or stat.get("pa"))
+            results.append({
+                "split_name": split.get("split", {}).get("description", ""),
+                "split_code": split.get("split", {}).get("code", ""),
+                "pa": pa_count,
+                "avg": _parse_pct(stat.get("avg")),
+                "obp": _parse_pct(stat.get("obp")),
+                "slg": _parse_pct(stat.get("slg")),
+                "ops": _parse_pct(stat.get("ops")),
+                "woba": stat.get("woba"),
+                "hr": stat.get("homeRuns") or stat.get("hr"),
+                "rbi": stat.get("rbi"),
+                "k_pct": _pct_of_pa(stat.get("strikeOuts"), pa_count),
+                "bb_pct": _pct_of_pa(stat.get("baseOnBalls"), pa_count),
+            })
         return results
 
     async def get_player_game_log(self, mlbam_id: int, season: int, group: str = "hitting") -> list[dict]:

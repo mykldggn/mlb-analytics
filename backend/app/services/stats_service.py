@@ -219,8 +219,9 @@ def _savant_statcast_leaderboard(season: int, stat_type: str = "batter") -> pd.D
             if cl in ("player_id", "mlbam_id", "batter", "pitcher"):
                 col_map[col] = "mlbam_id"
             elif cl in ("barrel_batted_rate", "barrel_rate", "brl_percent", "brls_per_bbe_formatted",
-                        "barrel_pct", "brl_pa", "brls_per_pa"):
-                # Only map the RATE column, not the raw barrel count column ("barrel")
+                        "barrel_pct"):
+                # Only map the per-BBE rate column — NOT brl_pa (per PA, different metric)
+                # "barrels" (raw count column) is intentionally excluded
                 col_map[col] = "barrel_pct"
             elif "hard_hit" in cl and ("percent" in cl or "pct" in cl or cl.endswith("_pct") or cl.endswith("_percent")):
                 col_map[col] = "hard_hit_pct"
@@ -230,6 +231,9 @@ def _savant_statcast_leaderboard(season: int, stat_type: str = "batter") -> pd.D
                 col_map[col] = "avg_la"
 
         df = df.rename(columns=col_map)
+        # Deduplicate columns in case multiple source columns mapped to the same target
+        if df.columns.duplicated().any():
+            df = df.loc[:, ~df.columns.duplicated()]
         keep = [c for c in ("mlbam_id", "barrel_pct", "hard_hit_pct", "avg_ev", "avg_la")
                 if c in df.columns]
         if "mlbam_id" not in keep:
@@ -291,8 +295,8 @@ def _savant_expected_stats(season: int, stat_type: str = "batter") -> pd.DataFra
             elif cl in ("est_obp", "xobp", "expected_obp"):
                 col_map[col] = "xobp"
             elif cl in ("barrel_batted_rate", "barrel_rate", "brl_percent", "brls_per_bbe_formatted",
-                        "barrel_pct", "brl_pa", "brls_per_pa"):
-                # Only map the RATE column, not the raw barrel count column ("barrel")
+                        "barrel_pct"):
+                # Only map the per-BBE rate column — NOT brl_pa (per PA, different metric)
                 col_map[col] = "barrel_pct"
             elif "hard_hit" in cl and "percent" in cl:
                 col_map[col] = "hard_hit_pct"
