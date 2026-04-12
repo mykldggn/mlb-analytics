@@ -243,13 +243,10 @@ def _savant_statcast_leaderboard(season: int, stat_type: str = "batter") -> pd.D
         df["mlbam_id"] = pd.to_numeric(df["mlbam_id"], errors="coerce")
         df = df.dropna(subset=["mlbam_id"])
         df["mlbam_id"] = df["mlbam_id"].astype(int)
-        # Convert barrel_pct from percentage (e.g. 8.5) to decimal (0.085) if needed
+        # Keep barrel_pct as-is (Savant returns e.g. 23.5 meaning 23.5%)
+        # The frontend formatPct(..., alreadyPct=true) expects percent form, not decimal
         if "barrel_pct" in df.columns:
-            bp = pd.to_numeric(df["barrel_pct"], errors="coerce")
-            # Savant returns values like 8.5 (percent); normalize to 0–1
-            if bp.dropna().median() > 1:
-                bp = bp / 100
-            df["barrel_pct"] = bp.round(4)
+            df["barrel_pct"] = pd.to_numeric(df["barrel_pct"], errors="coerce").round(1)
         cache.disk_save(key, df)
         logger.info(f"Savant statcast leaderboard ({stat_type} {season}): {len(df)} players, barrel_pct included={('barrel_pct' in df.columns)}")
         return df
