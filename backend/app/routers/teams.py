@@ -55,15 +55,17 @@ async def get_team_analytics_all(
     from app.core import cache as disk_cache
     from app.services.fangraphs_service import get_team_batting_stats, get_team_pitching_stats
 
-    BAT_KEY = "team_analytics_all_batting_v2"
-    PIT_KEY = "team_analytics_all_pitching_v2"
-    STD_KEY = "team_analytics_all_standings_v2"
+    BAT_KEY = "team_analytics_all_batting_v3"
+    PIT_KEY = "team_analytics_all_pitching_v3"
+    STD_KEY = "team_analytics_all_standings_v3"
+    PO_KEY  = "team_analytics_all_playoff_v3"
 
     bat_cached = disk_cache.disk_get_fresh(BAT_KEY, ttl_hours=24)
     pit_cached = disk_cache.disk_get_fresh(PIT_KEY, ttl_hours=24)
     std_cached = disk_cache.disk_get_fresh(STD_KEY, ttl_hours=24)
+    po_cached  = disk_cache.disk_get_fresh(PO_KEY,  ttl_hours=24)
 
-    if bat_cached is not None and pit_cached is not None and std_cached is not None:
+    if bat_cached is not None and pit_cached is not None and std_cached is not None and po_cached is not None:
         def _to_records(df):
             return [{k: (None if v != v else v) for k, v in r.items()} for r in df.to_dict(orient="records")]
 
@@ -73,11 +75,14 @@ async def get_team_analytics_all(
             if abbr:
                 standings_map[abbr] = {k: (None if v != v else v) for k, v in r.items()}
 
+        playoff_abbrs = list(po_cached["abbr"].dropna().unique()) if "abbr" in po_cached.columns else []
+
         return {
             "season": 0,
             "batting": _to_records(bat_cached),
             "pitching": _to_records(pit_cached),
             "standings": standings_map,
+            "playoff_abbrs": playoff_abbrs,
             "errors": [],
         }
 
@@ -90,6 +95,8 @@ async def get_team_analytics_all(
     pit_acc: dict[str, dict[str, list]] = {}
     # Standings: abbr → list of per-season dicts
     std_acc: dict[str, list] = {}
+    # All teams that made the playoffs in any season (top 12 by win_pct per season)
+    playoff_union: set[str] = set()
     errors: list[str] = []
 
     for season in SEASONS:
@@ -134,6 +141,7 @@ async def get_team_analytics_all(
                     team_id_to_abbr[tid] = abbr
 
             records = await mlb.get_standings(season)
+            season_teams: list[tuple[str, float]] = []
             for division in records:
                 for team_rec in division.get("teamRecords", []):
                     team_info = team_rec.get("team", {})
@@ -141,15 +149,22 @@ async def get_team_analytics_all(
                     abbr = team_id_to_abbr.get(tid, "")
                     if not abbr:
                         continue
+                    win_pct = float(team_rec.get("winningPercentage", "0") or 0)
                     std_acc.setdefault(abbr, []).append({
                         "team_name": team_info.get("name", ""),
-                        "win_pct": float(team_rec.get("winningPercentage", "0") or 0),
+                        "win_pct": win_pct,
                         "w": int(team_rec.get("wins", 0)),
                         "l": int(team_rec.get("losses", 0)),
                         "run_diff": int(team_rec.get("runDifferential", 0)),
                         "rs": int(team_rec.get("runsScored", 0)),
                         "ra": int(team_rec.get("runsAllowed", 0)),
                     })
+                    season_teams.append((abbr, win_pct))
+
+            # Top 12 by win_pct = playoff field proxy (3 division winners + 2 WC per league)
+            season_teams.sort(key=lambda t: t[1], reverse=True)
+            for abbr, _ in season_teams[:12]:
+                playoff_union.add(abbr)
         except Exception as exc:
             errors.append(f"Standings {season}: {exc}")
 
@@ -192,23 +207,26 @@ async def get_team_analytics_all(
             "n_seasons": n,
         }
 
+    playoff_abbrs = sorted(playoff_union)
+
     # ── Save aggregated results to disk cache ────────────────────────────────
-    import numpy as np
     try:
         disk_cache.disk_save(BAT_KEY, pd.DataFrame(batting_rows))
         disk_cache.disk_save(PIT_KEY, pd.DataFrame(pitching_rows))
         std_rows = [{"abbr": abbr, **v} for abbr, v in standings_map.items()]
         disk_cache.disk_save(STD_KEY, pd.DataFrame(std_rows))
+        disk_cache.disk_save(PO_KEY, pd.DataFrame({"abbr": playoff_abbrs}))
     except Exception as exc:
         logger.warning(f"Could not cache all-seasons aggregation: {exc}")
 
-    logger.info(f"All-seasons analytics built: {len(batting_rows)} batting teams, {len(pitching_rows)} pitching teams, {len(standings_map)} standing teams")
+    logger.info(f"All-seasons analytics built: {len(batting_rows)} batting, {len(pitching_rows)} pitching, {len(standings_map)} standings, {len(playoff_abbrs)} playoff teams")
 
     return {
         "season": 0,
         "batting": batting_rows,
         "pitching": pitching_rows,
         "standings": standings_map,
+        "playoff_abbrs": playoff_abbrs,
         "errors": errors,
     }
 

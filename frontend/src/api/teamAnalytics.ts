@@ -15,6 +15,7 @@ export interface TeamAnalyticsResponse {
   batting: Record<string, unknown>[]
   pitching: Record<string, unknown>[]
   standings: Record<string, StandingsEntry>
+  playoff_abbrs?: string[]
   errors?: string[]
 }
 

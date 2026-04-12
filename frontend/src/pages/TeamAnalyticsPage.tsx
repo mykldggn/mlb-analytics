@@ -196,10 +196,11 @@ export default function TeamAnalyticsPage() {
     staleTime: 60 * 60 * 1000,
   })
 
-  // Determine which teams made the playoffs (top 3 each division + 2 WC per league = 12 teams)
-  // Use win_pct as a proxy — top 12 by win% approximates modern playoff field
+  // For all-seasons view: use the backend-computed union of every team that made
+  // the playoffs in any season. For single-season: top 12 by win_pct as proxy.
   const playoffAbbrs = (() => {
     if (!data) return new Set<string>()
+    if (data.playoff_abbrs) return new Set(data.playoff_abbrs)
     const teams = Object.entries(data.standings)
       .filter(([, s]) => (s as any).win_pct != null)
       .sort((a, b) => Number((b[1] as any).win_pct) - Number((a[1] as any).win_pct))
