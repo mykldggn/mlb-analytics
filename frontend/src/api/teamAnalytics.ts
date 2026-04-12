@@ -20,3 +20,6 @@ export interface TeamAnalyticsResponse {
 
 export const fetchTeamAnalytics = (season: number) =>
   get<TeamAnalyticsResponse>(`/teams/analytics/${season}`)
+
+export const fetchTeamAnalyticsAll = () =>
+  get<TeamAnalyticsResponse>(`/teams/analytics/all`)

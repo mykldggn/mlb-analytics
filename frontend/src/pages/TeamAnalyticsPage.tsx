@@ -4,11 +4,12 @@ import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip,
   ResponsiveContainer, ReferenceLine, Label, Cell,
 } from 'recharts'
-import { fetchTeamAnalytics } from '../api/teamAnalytics'
+import { fetchTeamAnalytics, fetchTeamAnalyticsAll } from '../api/teamAnalytics'
 import { CURRENT_SEASON, MLB_TEAM_COLORS } from '../utils/constants'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 
 const SEASONS_RANGE = Array.from({ length: 10 }, (_, i) => CURRENT_SEASON - i)
+const ALL_SEASONS = 0  // sentinel value for the "All Seasons" aggregate view
 
 // FanGraphs uses different abbreviations than MLB Stats API in some cases.
 // This map normalizes FanGraphs → MLB API abbreviations.
@@ -187,9 +188,11 @@ export default function TeamAnalyticsPage() {
   const [season, setSeason] = useState(CURRENT_SEASON)
   const [playoffOnly, setPlayoffOnly] = useState(false)
 
+  const isAllSeasons = season === ALL_SEASONS
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['team-analytics', season],
-    queryFn: () => fetchTeamAnalytics(season),
+    queryFn: () => isAllSeasons ? fetchTeamAnalyticsAll() : fetchTeamAnalytics(season),
     staleTime: 60 * 60 * 1000,
   })
 
@@ -266,7 +269,9 @@ export default function TeamAnalyticsPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Team Historical Analytics</h1>
           <p className="text-gray-500 text-sm mt-1 max-w-2xl">
-            Correlations between team WAR, offense, pitching quality, and wins. Does roster construction explain team success?
+            {isAllSeasons
+              ? 'Per-season averages across 2015–' + CURRENT_SEASON + '. Rate stats (win%, wRC+, FIP) are averaged; WAR is averaged per season to normalize for franchise history.'
+              : 'Correlations between team WAR, offense, pitching quality, and wins. Does roster construction explain team success?'}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -283,6 +288,7 @@ export default function TeamAnalyticsPage() {
             onChange={e => setSeason(Number(e.target.value))}
             className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
           >
+            <option value={ALL_SEASONS}>All Seasons (2015–{CURRENT_SEASON})</option>
             {SEASONS_RANGE.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
@@ -295,7 +301,7 @@ export default function TeamAnalyticsPage() {
       ) : !data ? null : mergedTeams.length === 0 ? (
         <div className="card text-center py-10">
           <div className="text-4xl mb-3">📊</div>
-          <p className="text-gray-400">No team data available for {season}.</p>
+          <p className="text-gray-400">No team data available{isAllSeasons ? ' for all seasons aggregate' : ` for ${season}`}.</p>
           {data.errors && data.errors.length > 0 && (
             <p className="text-xs text-gray-600 mt-2 max-w-lg mx-auto">{data.errors[0]}</p>
           )}
@@ -308,36 +314,38 @@ export default function TeamAnalyticsPage() {
             <TeamScatter
               data={toScatterWinPct('bat_war')}
               xKey="bat_war" yKey="win_pct"
-              xLabel="Batting WAR" yLabel="Win %"
+              xLabel={isAllSeasons ? 'Avg Batting WAR/Season' : 'Batting WAR'} yLabel={isAllSeasons ? 'Avg Win %' : 'Win %'}
               title="Batting WAR vs Win %"
-              description="Teams with elite offenses (high batting WAR) tend to win more games. How strong is the correlation?"
+              description={isAllSeasons ? 'Average batting WAR per season vs average win% — which franchises consistently pair elite offenses with wins?' : 'Teams with elite offenses (high batting WAR) tend to win more games. How strong is the correlation?'}
             />
             <TeamScatter
               data={toScatterWinPct('pit_war')}
               xKey="pit_war" yKey="win_pct"
-              xLabel="Pitching WAR" yLabel="Win %"
+              xLabel={isAllSeasons ? 'Avg Pitching WAR/Season' : 'Pitching WAR'} yLabel={isAllSeasons ? 'Avg Win %' : 'Win %'}
               title="Pitching WAR vs Win %"
-              description="Pitching is often called 'the name of the game.' Does pitching WAR predict wins better than batting?"
+              description={isAllSeasons ? 'Average pitching WAR per season vs average win% — does sustained pitching excellence drive long-term winning?' : "Pitching is often called 'the name of the game.' Does pitching WAR predict wins better than batting?"}
             />
             <TeamScatter
               data={toScatterWinPct('wrc_plus')}
               xKey="wrc_plus" yKey="win_pct"
-              xLabel="Team wRC+" yLabel="Win %"
+              xLabel={isAllSeasons ? 'Avg Team wRC+' : 'Team wRC+'} yLabel={isAllSeasons ? 'Avg Win %' : 'Win %'}
               title="Team wRC+ vs Win %"
-              description="wRC+ (park-adjusted offensive production, 100 = league avg) vs winning percentage."
+              description={isAllSeasons ? 'Average park-adjusted offense (wRC+) vs average win% across all seasons.' : 'wRC+ (park-adjusted offensive production, 100 = league avg) vs winning percentage.'}
             />
             <TeamScatter
               data={toScatterWinPct('fip')}
               xKey="fip" yKey="win_pct"
-              xLabel="Team FIP" yLabel="Win %"
+              xLabel={isAllSeasons ? 'Avg Team FIP' : 'Team FIP'} yLabel={isAllSeasons ? 'Avg Win %' : 'Win %'}
               title="Team FIP vs Win %"
-              description="Lower FIP = better pitching. Does defense-independent pitching quality predict wins?"
+              description={isAllSeasons ? 'Average FIP vs average win% — lower FIP franchises tend to win more consistently over time.' : 'Lower FIP = better pitching. Does defense-independent pitching quality predict wins?'}
             />
           </div>
 
           {/* Rankings */}
           <div className="card">
-            <h3 className="font-semibold text-gray-200 mb-4">{season} Team Rankings</h3>
+            <h3 className="font-semibold text-gray-200 mb-4">
+              {isAllSeasons ? `Team Rankings — All Seasons Avg (2015–${CURRENT_SEASON})` : `${season} Team Rankings`}
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <LeagueRankTable rows={battingWarRows} statKey="bat_war" label="Batting WAR" />
               <LeagueRankTable rows={pitchingWarRows} statKey="pit_war" label="Pitching WAR" />
