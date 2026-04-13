@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { formatStat } from '../../utils/formatters'
 import { STAT_DEFINITIONS } from '../../utils/constants'
+import Tooltip from '../ui/Tooltip'
 
 interface Entry {
   mlbam_id?: number
@@ -38,8 +39,12 @@ export default function LeaderboardTable({ data, visibleStats, sortBy, order, on
                     sortBy === k ? 'text-blue-400' : 'text-gray-500 hover:text-gray-300'
                   }`}
                 >
-                  {def?.label ?? k.toUpperCase()}
-                  {sortBy === k && <span className="ml-1">{order === 'desc' ? '↓' : '↑'}</span>}
+                  <Tooltip content={def?.description}>
+                    <span>
+                      {def?.label ?? k.toUpperCase()}
+                      {sortBy === k && <span className="ml-1">{order === 'desc' ? '↓' : '↑'}</span>}
+                    </span>
+                  </Tooltip>
                 </th>
               )
             })}

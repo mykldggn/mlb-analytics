@@ -66,8 +66,18 @@ export default function ComparisonPage() {
         {slots.length < 4 && <PlayerSearchInput onSelect={addPlayer} />}
       </div>
 
-      {slots.length < 2 ? (
-        <div className="card text-center py-10 text-gray-500">Add at least 2 players to compare.</div>
+      {slots.length === 0 ? (
+        <div className="card text-center py-16 space-y-3">
+          <div className="text-5xl">⚾</div>
+          <p className="text-gray-300 font-medium">Compare up to 4 players side-by-side</p>
+          <p className="text-gray-500 text-sm">Search for a player above to get started ↑</p>
+          <p className="text-gray-600 text-xs mt-2">Includes radar charts, percentile bars, and stat tables across any season</p>
+        </div>
+      ) : slots.length < 2 ? (
+        <div className="card text-center py-10 text-gray-500">
+          <p className="text-gray-400">Add one more player to start comparing.</p>
+          <p className="text-gray-600 text-sm mt-1">Search for another player above ↑</p>
+        </div>
       ) : (
         <ComparisonResults slots={slots} mode={mode} />
       )}

@@ -35,6 +35,23 @@
   }
 }
 
+@layer utilities {
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.18s ease both;
+  }
+  @keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-page-enter {
+    animation: pageFadeIn 0.22s ease both;
+  }
+}
+
 @layer components {
   .stat-elite   { @apply text-emerald-400 font-semibold; }
   .stat-great   { @apply text-green-400; }

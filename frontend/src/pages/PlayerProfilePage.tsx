@@ -96,7 +96,13 @@ export default function PlayerProfilePage() {
   const { playerId } = useParams<{ playerId: string }>()
   const id = playerId ? Number(playerId) : undefined
   const [season, setSeason] = useState(CURRENT_SEASON)
-  const [activeTab, setActiveTab] = useState('overview')
+  const TAB_STORAGE_KEY = 'playerProfile_activeTab'
+  const [activeTab, setActiveTab] = useState(() => sessionStorage.getItem(TAB_STORAGE_KEY) ?? 'overview')
+
+  function handleTabChange(tab: string) {
+    setActiveTab(tab)
+    sessionStorage.setItem(TAB_STORAGE_KEY, tab)
+  }
   const queryClient = useQueryClient()
   const [sprayLoading, setSprayLoading] = useState(false)
   const [pitchZoneLoading, setPitchZoneLoading] = useState(false)
@@ -198,7 +204,31 @@ export default function PlayerProfilePage() {
     setTimeout(() => { clearInterval(pitchZonePollRef.current!); setPitchZoneLoading(false) }, 180_000)
   }
 
-  if (playerLoading) return <LoadingSpinner label="Loading player..." />
+  if (playerLoading) return (
+    <div className="space-y-5 animate-pulse">
+      {/* Header skeleton */}
+      <div className="card flex items-center gap-4 p-4">
+        <div className="w-20 h-20 rounded-full bg-gray-800 shrink-0" />
+        <div className="space-y-2 flex-1">
+          <div className="h-6 bg-gray-800 rounded w-48" />
+          <div className="h-4 bg-gray-800 rounded w-32" />
+          <div className="h-4 bg-gray-800 rounded w-24" />
+        </div>
+      </div>
+      {/* Tab skeleton */}
+      <div className="flex gap-2 border-b border-gray-800 pb-2">
+        {[80, 60, 100, 60, 55].map((w, i) => (
+          <div key={i} className="h-8 bg-gray-800 rounded" style={{ width: w }} />
+        ))}
+      </div>
+      {/* Stat cards skeleton */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="card h-16 bg-gray-800/50" />
+        ))}
+      </div>
+    </div>
+  )
   if (playerError || !player) return <div className="text-red-400 text-sm">Player not found.</div>
 
   const p = player as Record<string, unknown>
@@ -223,7 +253,7 @@ export default function PlayerProfilePage() {
         </select>
       </div>
 
-      <TabGroup tabs={tabs} onTabChange={setActiveTab}>
+      <TabGroup tabs={tabs} onTabChange={handleTabChange}>
         {(active) => {
           if (active === 'overview') {
             const isStatsLoading = isPitcher ? !pitching : !batting

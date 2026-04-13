@@ -69,6 +69,8 @@ export default function HomePage() {
   )
 }
 
+const RANK_BADGES = ['🥇', '🥈', '🥉']
+
 function LeaderCard({ title, statKey, data }: {
   title: string; statKey: string; data?: unknown[]; lowerIsBetter?: boolean
 }) {
@@ -78,23 +80,25 @@ function LeaderCard({ title, statKey, data }: {
       {!data ? (
         <LoadingSpinner size="sm" />
       ) : (
-        <ol className="space-y-2">
+        <ol className="space-y-3">
           {(data as Array<Record<string, unknown>>).map((entry, i) => (
-            <li key={i} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600 w-4">{i + 1}</span>
+            <li key={i} className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-base w-6 shrink-0 text-center">
+                  {i < 3 ? RANK_BADGES[i] : <span className="text-xs text-gray-600">{i + 1}</span>}
+                </span>
                 {entry.headshot_url != null && (
-                  <img src={String(entry.headshot_url)} alt="" className="w-6 h-6 rounded-full bg-gray-700" />
+                  <img src={String(entry.headshot_url)} alt="" className="w-9 h-9 rounded-full bg-gray-700 shrink-0 object-cover" />
                 )}
                 {entry.mlbam_id ? (
-                  <Link to={`/players/${entry.mlbam_id}`} className="text-sm text-gray-200 hover:text-blue-400 transition-colors">
+                  <Link to={`/players/${entry.mlbam_id}`} className="text-sm text-gray-200 hover:text-blue-400 transition-colors truncate">
                     {String(entry.player_name)}
                   </Link>
                 ) : (
-                  <span className="text-sm text-gray-200">{String(entry.player_name)}</span>
+                  <span className="text-sm text-gray-200 truncate">{String(entry.player_name)}</span>
                 )}
               </div>
-              <span className="font-mono text-sm text-gray-100 font-semibold">
+              <span className="font-mono text-sm text-gray-100 font-semibold shrink-0">
                 {formatStat(statKey, (entry.stats as Record<string, unknown>)?.[statKey] as number)}
               </span>
             </li>

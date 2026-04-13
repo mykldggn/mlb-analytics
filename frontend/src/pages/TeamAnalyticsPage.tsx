@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip,
@@ -7,6 +7,17 @@ import {
 import { fetchTeamAnalytics, fetchTeamAnalyticsAll } from '../api/teamAnalytics'
 import { CURRENT_SEASON, MLB_TEAM_COLORS } from '../utils/constants'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
+
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < breakpoint)
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [breakpoint])
+  return isMobile
+}
 
 const SEASONS_RANGE = Array.from({ length: 10 }, (_, i) => CURRENT_SEASON - i)
 const ALL_SEASONS = 0  // sentinel value for the "All Seasons" aggregate view
@@ -83,6 +94,7 @@ function TeamScatter({
   title: string
   description: string
 }) {
+  const isMobile = useIsMobile()
   const avgX = data.length ? data.reduce((s, d) => s + d.x, 0) / data.length : 0
   const avgY = data.length ? data.reduce((s, d) => s + d.y, 0) / data.length : 0
   const r = pearsonR(data)
@@ -95,22 +107,25 @@ function TeamScatter({
         {rLabel && <span className="text-xs font-mono text-blue-400 bg-blue-950/40 px-2 py-0.5 rounded">{rLabel}</span>}
       </div>
       <p className="text-xs text-gray-500 mb-4">{description}</p>
-      <ResponsiveContainer width="100%" height={320}>
-        <ScatterChart margin={{ top: 10, right: 20, bottom: 30, left: 20 }}>
+      <ResponsiveContainer width="100%" height={isMobile ? 260 : 320}>
+        <ScatterChart margin={{ top: 10, right: isMobile ? 8 : 20, bottom: isMobile ? 20 : 30, left: isMobile ? 0 : 20 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
           <XAxis
             type="number" dataKey="x" name={xLabel}
-            stroke="#6b7280" tick={{ fill: '#9ca3af', fontSize: 11 }}
+            stroke="#6b7280"
+            tick={isMobile ? false : { fill: '#9ca3af', fontSize: 11 }}
             domain={['auto', 'auto']}
           >
-            <Label value={xLabel} offset={-10} position="insideBottom" fill="#6b7280" fontSize={12} />
+            {!isMobile && <Label value={xLabel} offset={-10} position="insideBottom" fill="#6b7280" fontSize={12} />}
           </XAxis>
           <YAxis
             type="number" dataKey="y" name={yLabel}
-            stroke="#6b7280" tick={{ fill: '#9ca3af', fontSize: 11 }}
+            stroke="#6b7280"
+            tick={isMobile ? false : { fill: '#9ca3af', fontSize: 11 }}
+            width={isMobile ? 10 : 40}
             domain={['auto', 'auto']}
           >
-            <Label value={yLabel} angle={-90} position="insideLeft" fill="#6b7280" fontSize={12} />
+            {!isMobile && <Label value={yLabel} angle={-90} position="insideLeft" fill="#6b7280" fontSize={12} />}
           </YAxis>
           <ReferenceLine x={avgX} stroke="#4b5563" strokeDasharray="4 2" />
           <ReferenceLine y={avgY} stroke="#4b5563" strokeDasharray="4 2" />
