@@ -91,19 +91,35 @@ def _ip_to_decimal(ip_str) -> float:
 # Baseball Reference WAR
 # ---------------------------------------------------------------------------
 
+# Module-level holders so bRef data survives TTLCache eviction (only 3 cols needed)
+_bref_bat_df:   pd.DataFrame | None = None
+_bref_pitch_df: pd.DataFrame | None = None
+_BREF_COLS = ["year_ID", "mlb_ID", "WAR"]
+_BREF_TTL_SECS = 72 * 3600
+
+
 def _load_bref_bat_full() -> pd.DataFrame:
-    """Download and cache the full bRef batting WAR file (refreshed every 3 days)."""
-    key = "bref_war_bat_full"
+    """Download and cache the bRef batting WAR file (year_ID, mlb_ID, WAR only)."""
+    global _bref_bat_df
+    import time
+    if _bref_bat_df is not None:
+        return _bref_bat_df
+
+    key = "bref_war_bat_full_v2"
     df = cache.disk_get_fresh(key, ttl_hours=72)
     if df is not None:
+        _bref_bat_df = df
         return df
+
     logger.info("Downloading Baseball Reference batting WAR file...")
     try:
         resp = httpx.get(BREF_BAT_URL, timeout=60,
                          headers={"User-Agent": "Mozilla/5.0"})
         resp.raise_for_status()
-        df = pd.read_csv(io.StringIO(resp.text), low_memory=False)
+        df = pd.read_csv(io.StringIO(resp.text), usecols=_BREF_COLS,
+                         dtype={"WAR": "float32"}, low_memory=False)
         cache.disk_save(key, df)
+        _bref_bat_df = df
         logger.info(f"bRef batting WAR loaded: {len(df)} rows")
         return df
     except Exception as exc:
@@ -112,18 +128,26 @@ def _load_bref_bat_full() -> pd.DataFrame:
 
 
 def _load_bref_pitch_full() -> pd.DataFrame:
-    """Download and cache the full bRef pitching WAR file (refreshed every 3 days)."""
-    key = "bref_war_pitch_full"
+    """Download and cache the bRef pitching WAR file (year_ID, mlb_ID, WAR only)."""
+    global _bref_pitch_df
+    if _bref_pitch_df is not None:
+        return _bref_pitch_df
+
+    key = "bref_war_pitch_full_v2"
     df = cache.disk_get_fresh(key, ttl_hours=72)
     if df is not None:
+        _bref_pitch_df = df
         return df
+
     logger.info("Downloading Baseball Reference pitching WAR file...")
     try:
         resp = httpx.get(BREF_PITCH_URL, timeout=60,
                          headers={"User-Agent": "Mozilla/5.0"})
         resp.raise_for_status()
-        df = pd.read_csv(io.StringIO(resp.text), low_memory=False)
+        df = pd.read_csv(io.StringIO(resp.text), usecols=_BREF_COLS,
+                         dtype={"WAR": "float32"}, low_memory=False)
         cache.disk_save(key, df)
+        _bref_pitch_df = df
         logger.info(f"bRef pitching WAR loaded: {len(df)} rows")
         return df
     except Exception as exc:
