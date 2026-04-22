@@ -315,7 +315,7 @@ export default function HomePage() {
           </h2>
           <span style={{ fontSize: 13, color: 'var(--text3)' }}>Through {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, maxWidth: 960, margin: '0 auto' }}>
           <LeaderCard title="Home Runs"    statKey="hr"  data={hrLeaders?.data} />
           <LeaderCard title="Batting WAR"  statKey="war" data={warHitters?.data} />
           <LeaderCard title="FIP (Starters)" statKey="fip" data={eraLeaders?.data} lowerIsBetter />
