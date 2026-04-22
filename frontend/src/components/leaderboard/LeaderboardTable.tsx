@@ -24,7 +24,7 @@ export default function LeaderboardTable({ data, visibleStats, sortBy, order, on
   return (
     <div className="overflow-x-auto">
       <table className="w-full" style={{ fontSize: 13 }}>
-        <thead style={{ position: 'sticky', top: 64, zIndex: 10, background: 'var(--bg2)', backdropFilter: 'blur(8px)' }}>
+        <thead style={{ background: 'var(--bg2)' }}>
           <tr style={{ borderBottom: '1px solid var(--border2)' }}>
             <th style={{ textAlign: 'left', padding: '10px 8px', fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text3)', width: 32 }}>#</th>
             <th style={{ textAlign: 'left', padding: '10px 8px', fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text3)' }}>Player</th>
