@@ -203,13 +203,13 @@ export default function ContractValuePage() {
           </div>
 
           {/* Methodology */}
-          <div className="card border-gray-800 bg-gray-900/40">
-            <h3 className="text-xs text-gray-500 uppercase tracking-wider mb-2">Methodology</h3>
-            <p className="text-xs text-gray-400 leading-relaxed">
+          <div className="card" style={{ background: 'rgba(0,31,91,0.04)', borderColor: 'rgba(0,31,91,0.14)' }}>
+            <h3 style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text3)', marginBottom: 8 }}>Methodology</h3>
+            <p style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.65 }}>
               Salary data from the Lahman Baseball Database (public domain, extended through 2024 by community contributors). WAR from FanGraphs via pybaseball.
               Players are matched using the Chadwick Bureau cross-reference register.
-              <span className="text-gray-300"> Best value</span> = highest WAR earned per $1M of salary.
-              <span className="text-gray-300"> Most expensive</span> = highest dollars spent per win above replacement.
+              <span style={{ color: 'var(--text)', fontWeight: 500 }}> Best value</span> = highest WAR earned per $1M of salary.
+              <span style={{ color: 'var(--text)', fontWeight: 500 }}> Most expensive</span> = highest dollars spent per win above replacement.
               Minimum thresholds applied ({group === 'batting' ? '100 PA' : '40 IP'}) to filter small samples.
             </p>
           </div>

@@ -123,10 +123,21 @@
 .bg-gray-800 { background-color: var(--bg2) !important; }
 .bg-gray-700 { background-color: var(--bg3) !important; }
 
-/* bg-gray-900/95, bg-gray-900/80, etc. (opacity variants) */
+/* bg-gray-900 opacity variants */
 .bg-gray-900\/95,
 .bg-gray-900\/90,
 .bg-gray-900\/80 { background-color: rgba(255,255,255,0.97) !important; }
+.bg-gray-900\/70,
+.bg-gray-900\/60,
+.bg-gray-900\/50,
+.bg-gray-900\/40 { background-color: rgba(0,31,91,0.04) !important; }
+
+/* bg-gray-800 opacity variants (modal mini-cards, factor grids, etc.) */
+.bg-gray-800\/80,
+.bg-gray-800\/60,
+.bg-gray-800\/50,
+.bg-gray-800\/40,
+.bg-gray-800\/30 { background-color: var(--surface) !important; }
 
 /* Dark tinted panels that use blue */
 .bg-blue-950\/20  { background-color: rgba(0, 31, 91, 0.05) !important; }
