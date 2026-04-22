@@ -77,11 +77,10 @@ function StitchPattern() {
 
 const RANK_BADGES = ['🥇', '🥈', '🥉']
 
-function LeaderCard({ title, statKey, data, lowerIsBetter = false }: {
+function LeaderCard({ title, statKey, data }: {
   title: string
   statKey: string
   data?: unknown[]
-  lowerIsBetter?: boolean
 }) {
   return (
     <div
@@ -118,37 +117,37 @@ function LeaderCard({ title, statKey, data, lowerIsBetter = false }: {
       ) : (
         <ol className="space-y-3">
           {(data as Array<Record<string, unknown>>).map((entry, i) => (
-            <li key={i} className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <span style={{ fontSize: 15, width: 22, textAlign: 'center', flexShrink: 0 }}>
-                  {i < 3 ? RANK_BADGES[i] : <span style={{ fontSize: 12, fontFamily: "'DM Mono', monospace", color: 'var(--text3)' }}>{i + 1}</span>}
-                </span>
-                {entry.headshot_url != null && (
-                  <img
-                    src={String(entry.headshot_url)}
-                    alt=""
-                    className="w-8 h-8 rounded-full object-cover shrink-0"
-                    style={{ background: 'var(--bg3)', border: '1.5px solid rgba(0,25,80,0.12)', boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}
-                  />
-                )}
+            <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 15, width: 22, textAlign: 'center', flexShrink: 0 }}>
+                {i < 3 ? RANK_BADGES[i] : <span style={{ fontSize: 12, fontFamily: "'DM Mono', monospace", color: 'var(--text3)' }}>{i + 1}</span>}
+              </span>
+              {entry.headshot_url != null && (
+                <img
+                  src={String(entry.headshot_url)}
+                  alt=""
+                  className="w-8 h-8 rounded-full object-cover shrink-0"
+                  style={{ background: 'var(--bg3)', border: '1.5px solid rgba(0,25,80,0.12)', boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}
+                />
+              )}
+              <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
                 {entry.mlbam_id ? (
                   <Link
                     to={`/players/${entry.mlbam_id}`}
-                    style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: 'none' }}
+                    style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: 'none', display: 'block' }}
                     onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent2)')}
                     onMouseLeave={e => (e.currentTarget.style.color = 'var(--text)')}
                   >
                     {String(entry.player_name)}
                   </Link>
                 ) : (
-                  <span style={{ fontSize: 13, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 13, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
                     {String(entry.player_name)}
                   </span>
                 )}
+                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 18, fontWeight: 700, color: 'var(--accent2)', display: 'block', lineHeight: 1.2, marginTop: 1 }}>
+                  {formatStat(statKey, (entry.stats as Record<string, unknown>)?.[statKey] as number)}
+                </span>
               </div>
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 14, fontWeight: 700, color: lowerIsBetter ? 'var(--accent2)' : 'var(--accent2)', flexShrink: 0 }}>
-                {formatStat(statKey, (entry.stats as Record<string, unknown>)?.[statKey] as number)}
-              </span>
             </li>
           ))}
         </ol>
@@ -318,7 +317,7 @@ export default function HomePage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, maxWidth: 960, margin: '0 auto' }}>
           <LeaderCard title="Home Runs"    statKey="hr"  data={hrLeaders?.data} />
           <LeaderCard title="Batting WAR"  statKey="war" data={warHitters?.data} />
-          <LeaderCard title="FIP (Starters)" statKey="fip" data={eraLeaders?.data} lowerIsBetter />
+          <LeaderCard title="FIP (Starters)" statKey="fip" data={eraLeaders?.data} />
         </div>
       </section>
 
