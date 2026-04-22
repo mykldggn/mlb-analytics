@@ -108,26 +108,29 @@ export default function ContractValuePage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Contract Value</h1>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Contract Value</h1>
           <p className="text-gray-500 text-sm mt-1 max-w-2xl">
             WAR per salary dollar — who earned their contract and who was overpaid?
             Salary data from the Lahman database{data?.max_year ? ` (available through ${data.max_year})` : ''}.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex gap-1 bg-gray-800 rounded-lg p-1">
+          <div style={{ display: 'flex', gap: 4, background: 'var(--bg2)', borderRadius: 8, padding: 4 }}>
             {(['batting', 'pitching'] as const).map(g => (
               <button key={g} onClick={() => setGroup(g)}
-                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors capitalize ${
-                  group === g ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-200'
-                }`}
+                style={{
+                  padding: '6px 12px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                  background: group === g ? 'var(--accent2)' : 'transparent',
+                  color: group === g ? 'white' : 'var(--text2)',
+                  border: 'none', textTransform: 'capitalize',
+                }}
               >{g}</button>
             ))}
           </div>
           <select
             value={season}
             onChange={e => setSeason(Number(e.target.value))}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
+            style={{ background: 'white', border: '1px solid var(--border2)', borderRadius: 8, padding: '6px 12px', fontSize: 13, color: 'var(--text)', outline: 'none' }}
           >
             {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
@@ -152,8 +155,8 @@ export default function ContractValuePage() {
       ) : (
         <div className="space-y-6">
           {/* Summary */}
-          <div className="card border-blue-900/40 bg-blue-950/10">
-            <div className="flex items-center gap-3 text-sm text-gray-400">
+          <div className="card" style={{ borderColor: 'rgba(0,31,91,0.14)', background: 'rgba(0,31,91,0.04)' }}>
+            <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--text2)' }}>
               <span className="text-blue-400 text-lg">📊</span>
               <span>
                 <span className="text-gray-200 font-medium">{data.total_players} players</span> matched between

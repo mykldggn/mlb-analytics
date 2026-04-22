@@ -36,26 +36,26 @@ export default function LeaderboardPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-bold text-white">Leaderboards</h1>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Leaderboards</h1>
         <div className="flex items-center gap-3">
           {warmupState === 'done' && warmupResult ? (
-            <span className="text-xs text-emerald-400">
+            <span style={{ fontSize: 11, color: '#059669' }}>
               Statcast: {warmupResult.triggered} queued, {warmupResult.already_cached} already cached
             </span>
           ) : warmupState === 'loading' ? (
-            <span className="text-xs text-blue-400">Queuing Statcast jobs...</span>
+            <span style={{ fontSize: 11, color: 'var(--accent2)' }}>Queuing Statcast jobs...</span>
           ) : (
             <button
               onClick={handleWarmup}
               title="Pre-cache Statcast data for top 25 batters and pitchers"
-              className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1"
+              style={{ fontSize: 11, color: 'var(--text3)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
             >
               Pre-load Statcast
             </button>
           )}
           <button
             onClick={() => setGlossaryOpen(o => !o)}
-            className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1"
+            style={{ fontSize: 11, color: 'var(--text3)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
           >
             <span>📖</span> Metric Glossary {glossaryOpen ? '▲' : '▼'}
           </button>
@@ -63,16 +63,16 @@ export default function LeaderboardPage() {
       </div>
 
       {glossaryOpen && (
-        <div className="card bg-gray-900/80 border border-gray-700 rounded-xl p-4">
-          <h3 className="text-xs text-gray-500 uppercase tracking-wider mb-3">Stat Definitions</h3>
+        <div className="card" style={{ background: 'white' }}>
+          <h3 style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text3)', marginBottom: 12 }}>Stat Definitions</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {glossaryStats.map(k => {
               const def = STAT_DEFINITIONS[k]
               if (!def) return null
               return (
                 <div key={k} className="flex gap-2">
-                  <span className="text-blue-400 text-xs font-mono w-20 shrink-0 pt-0.5">{def.label}</span>
-                  <span className="text-gray-400 text-xs leading-snug">{def.description}</span>
+                  <span style={{ fontSize: 11, fontFamily: "'DM Mono', monospace", color: 'var(--accent2)', width: 80, flexShrink: 0, paddingTop: 2 }}>{def.label}</span>
+                  <span style={{ fontSize: 11, color: 'var(--text2)', lineHeight: 1.5 }}>{def.description}</span>
                 </div>
               )
             })}
@@ -179,18 +179,20 @@ function Pagination({ page, total, pageSize, onChange }: { page: number; total: 
   const totalPages = Math.ceil(total / pageSize)
   if (totalPages <= 1) return null
   return (
-    <div className="flex items-center justify-between mt-4 text-sm">
-      <span className="text-gray-500">{total} players</span>
+    <div className="flex items-center justify-between mt-4" style={{ fontSize: 13 }}>
+      <span style={{ color: 'var(--text3)' }}>{total} players</span>
       <div className="flex items-center gap-2">
-        <button disabled={page <= 1} onClick={() => onChange(page - 1)}
-          className="px-3 py-1 bg-gray-800 rounded-lg text-gray-400 hover:text-gray-200 disabled:opacity-40 transition-colors">
-          ← Prev
-        </button>
-        <span className="text-gray-400">{page} / {totalPages}</span>
-        <button disabled={page >= totalPages} onClick={() => onChange(page + 1)}
-          className="px-3 py-1 bg-gray-800 rounded-lg text-gray-400 hover:text-gray-200 disabled:opacity-40 transition-colors">
-          Next →
-        </button>
+        <button
+          disabled={page <= 1}
+          onClick={() => onChange(page - 1)}
+          style={{ padding: '4px 12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text2)', cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.4 : 1 }}
+        >← Prev</button>
+        <span style={{ color: 'var(--text2)' }}>{page} / {totalPages}</span>
+        <button
+          disabled={page >= totalPages}
+          onClick={() => onChange(page + 1)}
+          style={{ padding: '4px 12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text2)', cursor: page >= totalPages ? 'not-allowed' : 'pointer', opacity: page >= totalPages ? 0.4 : 1 }}
+        >Next →</button>
       </div>
     </div>
   )

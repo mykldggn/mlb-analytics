@@ -5,21 +5,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        'mlb-navy': '#002D72',
-        'mlb-red': '#D50032',
-        'mlb-cream': '#F5F0E8',
-        brand: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          900: '#1e3a5f',
-        },
+        'mlb-navy': '#001f5b',
+        'mlb-red': '#b8001a',
+        'mlb-cream': '#f3f0e8',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ["'DM Sans'", 'system-ui', 'sans-serif'],
+        mono: ["'DM Mono'", 'monospace'],
+        serif: ["'Playfair Display'", 'Georgia', 'serif'],
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

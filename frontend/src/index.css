@@ -2,89 +2,189 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Press Box Design Tokens ─────────────────────────────────────────────── */
 @layer base {
   :root {
-    --color-primary: 59 130 246;
-    --color-accent: 239 68 68;
-    /* Baseball field green for subtle accents */
-    --color-field: 34 197 94;
+    --bg:       #f3f0e8;
+    --bg2:      #eae7de;
+    --bg3:      #dedad0;
+    --surface:  rgba(0, 25, 80, 0.05);
+    --surface2: rgba(0, 25, 80, 0.09);
+    --border:   rgba(0, 25, 80, 0.10);
+    --border2:  rgba(0, 25, 80, 0.22);
+    --text:     #071020;
+    --text2:    #3d5070;
+    --text3:    #7a8fa8;
+    --accent:   #b8001a;
+    --accentH:  #d50020;
+    --accent2:  #001f5b;
+    --accent2H: #0a2d7a;
+  }
+
+  html {
+    background-color: var(--bg);
+    color: var(--text);
   }
 
   body {
-    background-color: #060a12;
-    /* Subtle leather/stitching texture via radial gradient */
-    background-image:
-      radial-gradient(ellipse at 20% 50%, rgba(30, 41, 59, 0.4) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 20%, rgba(15, 23, 42, 0.6) 0%, transparent 50%);
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    /* Pinstripe texture */
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent 0px, transparent 32px,
+      rgba(0, 31, 91, 0.055) 32px, rgba(0, 31, 91, 0.055) 33.5px
+    );
+    background-attachment: fixed;
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: #374151 #111827;
+    scrollbar-color: var(--border2) var(--bg2);
   }
-  *::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  *::-webkit-scrollbar-track {
-    background: #0a0f1a;
-  }
-  *::-webkit-scrollbar-thumb {
-    background-color: #2d3748;
-    border-radius: 3px;
-  }
+  *::-webkit-scrollbar       { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-track { background: var(--bg2); }
+  *::-webkit-scrollbar-thumb { background-color: var(--border2); border-radius: 3px; }
+
+  button, input, select, textarea { font-family: inherit; }
 }
 
-@layer utilities {
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .animate-fade-in {
-    animation: fadeIn 0.18s ease both;
-  }
-  @keyframes pageFadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .animate-page-enter {
-    animation: pageFadeIn 0.22s ease both;
-  }
-}
-
+/* ─── Component Utilities ──────────────────────────────────────────────────── */
 @layer components {
-  .stat-elite   { @apply text-emerald-400 font-semibold; }
-  .stat-great   { @apply text-green-400; }
-  .stat-above   { @apply text-sky-400; }
-  .stat-avg     { @apply text-gray-300; }
-  .stat-below   { @apply text-amber-400; }
-  .stat-poor    { @apply text-red-400; }
-
   .card {
-    @apply bg-gray-900/90 rounded-xl border border-gray-800/80 p-4
-           shadow-[0_1px_3px_rgba(0,0,0,0.4)];
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0, 25, 80, 0.06);
+    @apply rounded-xl p-4;
   }
   .card-hover {
-    @apply card transition-all duration-150
-           hover:border-gray-600/80 hover:bg-gray-800/70
-           hover:shadow-[0_2px_8px_rgba(0,0,0,0.5)];
+    @apply card transition-all duration-150 cursor-pointer;
+  }
+  .card-hover:hover {
+    background: var(--bg2);
+    border-color: var(--border2);
+    box-shadow: 0 4px 12px rgba(0, 25, 80, 0.10);
+    transform: translateY(-2px);
   }
   .badge {
     @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium;
   }
   .table-row-hover {
-    @apply transition-colors hover:bg-gray-800/60;
+    transition: background-color 150ms;
+  }
+  .table-row-hover:hover {
+    background: rgba(0, 25, 80, 0.04);
   }
 
-  /* Scoreboard-style stat value */
   .stat-scoreboard {
-    @apply font-mono tabular-nums tracking-tight;
+    font-family: 'DM Mono', monospace;
     font-feature-settings: "tnum";
+    @apply tabular-nums tracking-tight;
   }
 
-  /* Diamond bullet for lists */
-  .diamond-list li::before {
-    content: "◆";
-    @apply text-blue-500 mr-2 text-xs;
-  }
+  /* Stat quality tiers */
+  .stat-elite { @apply font-semibold; color: #059669; }
+  .stat-great { color: #16a34a; }
+  .stat-above { color: #0369a1; }
+  .stat-avg   { color: var(--text2); }
+  .stat-below { color: #d97706; }
+  .stat-poor  { color: #dc2626; }
 }
+
+/* ─── Animations ───────────────────────────────────────────────────────────── */
+@layer utilities {
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in { animation: fadeIn 0.18s ease both; }
+
+  @keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-page-enter { animation: pageFadeIn 0.22s ease both; }
+}
+
+/* ─── Global Press Box Color Remapping ────────────────────────────────────── */
+/*
+ * These rules sit outside @layer blocks so they cascade after all Tailwind
+ * utilities, seamlessly re-theming dark-mode classes to press box values
+ * without touching every component file.
+ */
+
+/* Backgrounds */
+.bg-\[\#060a12\],
+.bg-gray-950 { background-color: var(--bg) !important; }
+
+.bg-gray-900 { background-color: white !important; }
+.bg-gray-800 { background-color: var(--bg2) !important; }
+.bg-gray-700 { background-color: var(--bg3) !important; }
+
+/* bg-gray-900/95, bg-gray-900/80, etc. (opacity variants) */
+.bg-gray-900\/95,
+.bg-gray-900\/90,
+.bg-gray-900\/80 { background-color: rgba(255,255,255,0.97) !important; }
+
+/* Dark tinted panels that use blue */
+.bg-blue-950\/20  { background-color: rgba(0, 31, 91, 0.05) !important; }
+.bg-blue-950\/10  { background-color: rgba(0, 31, 91, 0.04) !important; }
+
+/* Text */
+.text-white        { color: var(--text) !important; }
+.text-gray-100     { color: var(--text) !important; }
+.text-gray-200     { color: var(--text) !important; }
+.text-gray-300     { color: var(--text2) !important; }
+.text-gray-400     { color: var(--text2) !important; }
+.text-gray-500     { color: var(--text3) !important; }
+.text-gray-600     { color: var(--text3) !important; }
+
+/* Borders */
+.border-gray-800,
+.border-gray-800\/50,
+.border-gray-800\/40 { border-color: var(--border) !important; }
+.border-gray-700     { border-color: var(--border2) !important; }
+.border-gray-600     { border-color: var(--border2) !important; }
+
+/* Progress / chart track backgrounds */
+.bg-gray-700.rounded-full { background-color: var(--bg3) !important; }
+.bg-gray-800.rounded-full { background-color: var(--bg3) !important; }
+
+/* Blue accent → MLB navy */
+.text-blue-400   { color: var(--accent2) !important; }
+.text-blue-500   { color: var(--accent2) !important; }
+.text-blue-300   { color: var(--accent2) !important; }
+.bg-blue-600     { background-color: var(--accent2) !important; }
+.bg-blue-600:hover,
+.hover\:bg-blue-700:hover { background-color: var(--accent2H) !important; }
+
+/* Select / input dark backgrounds */
+select.bg-gray-800,
+input.bg-gray-800 {
+  background-color: white !important;
+  border-color: var(--border2) !important;
+  color: var(--text) !important;
+}
+select.bg-gray-800 option,
+input.bg-gray-800 option {
+  background: white;
+  color: var(--text);
+}
+
+/* Dashed border for "Add player" chip */
+.border-dashed.bg-gray-800 {
+  background-color: transparent !important;
+  border-color: var(--border2) !important;
+}
+
+/* Blue progress bar background (amber/blue knowledge-box borders) */
+.border-blue-900\/50 { border-color: rgba(0,31,91,0.18) !important; }
+.border-blue-900\/40 { border-color: rgba(0,31,91,0.14) !important; }
+.text-blue-300       { color: var(--accent2) !important; }
+
+/* Orange/amber/red keep their semantic colors — no override needed */
+
+/* Backdrop */
+.backdrop-blur { backdrop-filter: blur(16px); }

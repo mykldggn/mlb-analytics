@@ -5,12 +5,12 @@ import { searchPlayers, PlayerSearchResult } from '../../api/search'
 import { useDebounce } from '../../hooks/useDebounce'
 
 const NAV_LINKS = [
-  { to: '/leaderboards', label: 'Leaderboards' },
-  { to: '/compare', label: 'Compare' },
-  { to: '/park-factors', label: 'Park Factors' },
+  { to: '/leaderboards',   label: 'Leaderboards' },
+  { to: '/compare',        label: 'Compare' },
+  { to: '/park-factors',   label: 'Park Factors' },
   { to: '/team-analytics', label: 'Team Analytics' },
   { to: '/contract-value', label: 'Contract Value' },
-  { to: '/pitch-zones', label: 'Pitch Zones' },
+  { to: '/pitch-zones',    label: 'Pitch Zones' },
 ]
 
 export default function Navbar() {
@@ -19,8 +19,15 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 8)
+    window.addEventListener('scroll', handler, { passive: true })
+    return () => window.removeEventListener('scroll', handler)
+  }, [])
 
   const { data: results } = useQuery({
     queryKey: ['search', debouncedQuery],
@@ -42,10 +49,7 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setMobileOpen(false)
-  }, [navigate])
+  useEffect(() => { setMobileOpen(false) }, [navigate])
 
   function onSelect(player: PlayerSearchResult) {
     setQuery('')
@@ -72,24 +76,73 @@ export default function Navbar() {
     }
   }, [open, results, selectedIndex]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `text-sm font-medium transition-colors ${isActive ? 'text-blue-400' : 'text-gray-400 hover:text-gray-100'}`
+  const navBg = scrolled
+    ? 'rgba(8, 17, 31, 0.96)'
+    : 'var(--bg2)'
 
   return (
-    <header className="sticky top-0 z-50 bg-[#060a12]/95 backdrop-blur border-b border-gray-800/60 shadow-lg shadow-black/30">
-      <div className="container mx-auto px-4 max-w-7xl flex items-center h-14 gap-6">
+    <header
+      className="sticky top-0 z-50 backdrop-blur"
+      style={{
+        background: navBg,
+        borderBottom: '1px solid var(--border2)',
+        boxShadow: scrolled ? '0 2px 12px rgba(0,25,80,0.10)' : 'none',
+        transition: 'background 0.2s, box-shadow 0.2s',
+        /* Subtle pinstripe on nav */
+        backgroundImage: scrolled
+          ? undefined
+          : `repeating-linear-gradient(90deg, transparent 20px, rgba(255,255,255,0.013) 20px, rgba(255,255,255,0.013) 21px)`,
+      }}
+    >
+      <div className="container mx-auto px-4 max-w-7xl flex items-center h-16 gap-6">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 shrink-0 group">
-          <span className="text-xl group-hover:rotate-12 transition-transform duration-300 inline-block">⚾</span>
-          <span className="font-bold text-white tracking-tight">
-            <span className="text-blue-400">MLB</span> Analytics
+          <img
+            src="/mlb-logo.png"
+            alt="MLB"
+            style={{ width: 48, height: 33, objectFit: 'contain' }}
+          />
+          <span style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 17,
+            fontWeight: 900,
+            color: scrolled ? '#eef2ff' : 'var(--text)',
+            letterSpacing: '-0.02em',
+            lineHeight: 1,
+          }}>
+            MLB{' '}
+          </span>
+          <span style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 17,
+            fontWeight: 700,
+            fontStyle: 'italic',
+            color: 'var(--accent2)',
+            letterSpacing: '-0.01em',
+            lineHeight: 1,
+          }}>
+            Analytics
           </span>
         </Link>
 
-        {/* Desktop nav links */}
+        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-5">
           {NAV_LINKS.map(({ to, label }) => (
-            <NavLink key={to} to={to} className={navLinkClass}>{label}</NavLink>
+            <NavLink
+              key={to}
+              to={to}
+              style={({ isActive }) => ({
+                fontSize: 13,
+                fontWeight: 500,
+                color: isActive ? 'var(--accent)' : (scrolled ? '#8095b8' : 'var(--text2)'),
+                borderBottom: isActive ? '2px solid var(--accent)' : '2px solid transparent',
+                paddingBottom: 2,
+                transition: 'color 0.15s, border-color 0.15s',
+                textDecoration: 'none',
+              })}
+            >
+              {label}
+            </NavLink>
           ))}
         </nav>
 
@@ -104,12 +157,24 @@ export default function Navbar() {
             aria-label="Search players"
             aria-expanded={open}
             aria-autocomplete="list"
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+            style={{
+              width: '100%',
+              background: 'white',
+              border: '1px solid var(--border2)',
+              borderRadius: 8,
+              padding: '6px 12px',
+              fontSize: 13,
+              color: 'var(--text)',
+              outline: 'none',
+            }}
+            onFocus={e => { e.target.style.borderColor = 'var(--accent2)' }}
+            onBlur={e => { e.target.style.borderColor = 'var(--border2)' }}
           />
           {open && results && results.length > 0 && (
             <div
               role="listbox"
-              className="absolute top-full mt-1 w-full bg-gray-900 border border-gray-700 rounded-lg shadow-xl overflow-hidden z-50"
+              className="absolute top-full mt-1 w-full rounded-xl shadow-xl overflow-hidden z-50"
+              style={{ background: 'white', border: '1px solid var(--border2)' }}
             >
               {results.map((p, idx) => (
                 <button
@@ -118,18 +183,21 @@ export default function Navbar() {
                   aria-selected={idx === selectedIndex}
                   onClick={() => onSelect(p)}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`flex items-center gap-3 w-full px-3 py-2 transition-colors text-left ${
-                    idx === selectedIndex ? 'bg-gray-700' : 'hover:bg-gray-800'
-                  }`}
+                  className="flex items-center gap-3 w-full px-3 py-2 text-left transition-colors"
+                  style={{
+                    background: idx === selectedIndex ? 'var(--surface2)' : 'transparent',
+                    color: 'var(--text)',
+                  }}
                 >
                   <img
                     src={p.headshot_url}
                     alt={p.fullName}
-                    className="w-8 h-8 rounded-full object-cover bg-gray-700 shrink-0"
+                    className="w-8 h-8 rounded-full object-cover shrink-0"
+                    style={{ background: 'var(--bg3)' }}
                   />
                   <div>
-                    <div className="text-sm text-gray-100">{p.fullName}</div>
-                    <div className="text-xs text-gray-500">{p.position} · {p.team}</div>
+                    <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{p.fullName}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text3)' }}>{p.position} · {p.team}</div>
                   </div>
                 </button>
               ))}
@@ -139,7 +207,8 @@ export default function Navbar() {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden flex flex-col gap-1.5 p-1.5 shrink-0 text-gray-400 hover:text-gray-100 transition-colors"
+          className="md:hidden flex flex-col gap-1.5 p-1.5 shrink-0 transition-colors"
+          style={{ color: scrolled ? '#8095b8' : 'var(--text2)' }}
           onClick={() => setMobileOpen(o => !o)}
           aria-label="Toggle navigation"
           aria-expanded={mobileOpen}
@@ -150,19 +219,24 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile dropdown menu */}
+      {/* Mobile dropdown */}
       {mobileOpen && (
-        <nav className="md:hidden border-t border-gray-800 bg-[#060a12]/98">
+        <nav style={{ background: 'var(--bg2)', borderTop: '1px solid var(--border)' }}>
           {NAV_LINKS.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
               onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `block px-5 py-3 text-sm font-medium border-b border-gray-800/50 transition-colors ${
-                  isActive ? 'text-blue-400 bg-blue-950/20' : 'text-gray-300 hover:text-white hover:bg-gray-800/40'
-                }`
-              }
+              style={({ isActive }) => ({
+                display: 'block',
+                padding: '12px 20px',
+                fontSize: 14,
+                fontWeight: 500,
+                borderBottom: '1px solid var(--border)',
+                color: isActive ? 'var(--accent)' : 'var(--text2)',
+                background: isActive ? 'rgba(184,0,26,0.05)' : 'transparent',
+                textDecoration: 'none',
+              })}
             >
               {label}
             </NavLink>

@@ -15,8 +15,8 @@ function pctColor(p: number) {
 export default function PercentileBar({ percentile, label, showValue = true }: Props) {
   return (
     <div className="flex items-center gap-2">
-      {label && <span className="text-xs text-gray-500 w-24 shrink-0">{label}</span>}
-      <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
+      {label && <span style={{ fontSize: 11, color: 'var(--text3)', width: 96, flexShrink: 0 }}>{label}</span>}
+      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg3)' }}>
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{ width: `${percentile}%`, backgroundColor: pctColor(percentile) }}

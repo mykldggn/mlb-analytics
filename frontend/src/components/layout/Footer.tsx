@@ -1,15 +1,16 @@
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-800 py-6 mt-8">
-      <div className="container mx-auto px-4 max-w-7xl text-center text-xs text-gray-600 space-y-1">
-        <p>Data sourced from the MLB Stats API, Baseball Reference (WAR), and Baseball Savant (Statcast / expected stats).</p>
-        <p>Park Favorability Index (PFI) is a proprietary composite statistic. Not affiliated with MLB.</p>
-        <p className="mt-2">
+    <footer style={{ background: 'var(--bg2)', borderTop: '1px solid var(--border)', marginTop: 32, padding: '20px 28px', textAlign: 'center' }}>
+      <div className="container mx-auto px-4 max-w-7xl space-y-1" style={{ fontSize: 12, color: 'var(--text3)', lineHeight: 2 }}>
+        <p>Data from MLB Stats API, Baseball Reference (WAR), and Baseball Savant (Statcast). Park Favorability Index is a proprietary composite — not affiliated with MLB.</p>
+        <p>
           <a
             href="https://github.com/mykldggn/mlb-analytics"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-500 hover:text-blue-400 transition-colors"
+            style={{ color: 'var(--text3)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent2)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text3)')}
           >
             GitHub ↗
           </a>

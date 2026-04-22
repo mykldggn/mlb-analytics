@@ -109,36 +109,36 @@ function TeamScatter({
       <p className="text-xs text-gray-500 mb-4">{description}</p>
       <ResponsiveContainer width="100%" height={isMobile ? 260 : 320}>
         <ScatterChart margin={{ top: 10, right: isMobile ? 8 : 20, bottom: isMobile ? 20 : 30, left: isMobile ? 0 : 20 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,25,80,0.10)" />
           <XAxis
             type="number" dataKey="x" name={xLabel}
-            stroke="#6b7280"
-            tick={isMobile ? false : { fill: '#9ca3af', fontSize: 11 }}
+            stroke="var(--border2)"
+            tick={isMobile ? false : { fill: 'var(--text3)', fontSize: 11 }}
             domain={['auto', 'auto']}
           >
             {!isMobile && <Label value={xLabel} offset={-10} position="insideBottom" fill="#6b7280" fontSize={12} />}
           </XAxis>
           <YAxis
             type="number" dataKey="y" name={yLabel}
-            stroke="#6b7280"
-            tick={isMobile ? false : { fill: '#9ca3af', fontSize: 11 }}
+            stroke="var(--border2)"
+            tick={isMobile ? false : { fill: 'var(--text3)', fontSize: 11 }}
             width={isMobile ? 10 : 40}
             domain={['auto', 'auto']}
           >
             {!isMobile && <Label value={yLabel} angle={-90} position="insideLeft" fill="#6b7280" fontSize={12} />}
           </YAxis>
-          <ReferenceLine x={avgX} stroke="#4b5563" strokeDasharray="4 2" />
-          <ReferenceLine y={avgY} stroke="#4b5563" strokeDasharray="4 2" />
+          <ReferenceLine x={avgX} stroke="rgba(0,25,80,0.25)" strokeDasharray="4 2" />
+          <ReferenceLine y={avgY} stroke="rgba(0,25,80,0.25)" strokeDasharray="4 2" />
           <ReTooltip
             cursor={{ strokeDasharray: '3 3' }}
             content={({ payload }) => {
               if (!payload?.length) return null
               const d = payload[0].payload as ScatterPoint
               return (
-                <div className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs">
-                  <div className="font-semibold text-gray-100 mb-1">{d.teamName || d.abbr}</div>
-                  <div className="text-gray-400">{xLabel}: <span className="text-gray-200">{d.x.toFixed(1)}</span></div>
-                  <div className="text-gray-400">{yLabel}: <span className="text-gray-200">{d.y.toFixed(3)}</span></div>
+                <div style={{ background: 'white', border: '1px solid var(--border2)', borderRadius: 8, padding: '8px 12px', fontSize: 12, boxShadow: '0 2px 8px rgba(0,25,80,0.12)' }}>
+                  <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{d.teamName || d.abbr}</div>
+                  <div style={{ color: 'var(--text2)' }}>{xLabel}: <span style={{ color: 'var(--text)', fontFamily: "'DM Mono',monospace" }}>{d.x.toFixed(1)}</span></div>
+                  <div style={{ color: 'var(--text2)' }}>{yLabel}: <span style={{ color: 'var(--text)', fontFamily: "'DM Mono',monospace" }}>{d.y.toFixed(3)}</span></div>
                 </div>
               )
             }}
@@ -283,7 +283,7 @@ export default function TeamAnalyticsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Team Historical Analytics</h1>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Team Historical Analytics</h1>
           <p className="text-gray-500 text-sm mt-1 max-w-2xl">
             {isAllSeasons
               ? 'Per-season averages across 2015–' + CURRENT_SEASON + '. Rate stats (win%, wRC+, FIP) are averaged; WAR is averaged per season to normalize for franchise history.'
@@ -293,16 +293,19 @@ export default function TeamAnalyticsPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setPlayoffOnly(o => !o)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              playoffOnly ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-gray-200'
-            }`}
+            style={{
+              padding: '6px 12px', borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: 'pointer',
+              background: playoffOnly ? '#d97706' : 'var(--surface)',
+              color: playoffOnly ? 'white' : 'var(--text2)',
+              border: playoffOnly ? 'none' : '1px solid var(--border)',
+            }}
           >
             🏆 Playoff Teams Only
           </button>
           <select
             value={season}
             onChange={e => setSeason(Number(e.target.value))}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
+            style={{ background: 'white', border: '1px solid var(--border2)', borderRadius: 8, padding: '6px 12px', fontSize: 13, color: 'var(--text)', outline: 'none' }}
           >
             <option value={ALL_SEASONS}>All Seasons (2015–{CURRENT_SEASON})</option>
             {SEASONS_RANGE.map(s => <option key={s} value={s}>{s}</option>)}

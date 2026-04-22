@@ -6,7 +6,7 @@ import BackToTop from '../ui/BackToTop'
 export default function AppLayout() {
   const location = useLocation()
   return (
-    <div className="min-h-screen flex flex-col bg-[#060a12] text-gray-100">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-6 max-w-7xl">
         <div key={location.pathname} className="animate-page-enter">

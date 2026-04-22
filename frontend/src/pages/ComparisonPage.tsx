@@ -33,13 +33,20 @@ export default function ComparisonPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">Player Comparison</h1>
+      <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Player Comparison</h1>
 
       {/* Mode toggle */}
       <div className="flex gap-2">
         {(['batting', 'pitching'] as const).map(m => (
           <button key={m} onClick={() => setMode(m)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${mode === m ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-gray-200'}`}
+            style={{
+              padding: '6px 16px', borderRadius: 8, fontSize: 13, fontWeight: 500,
+              transition: 'background 0.15s, color 0.15s', textTransform: 'capitalize',
+              background: mode === m ? 'var(--accent2)' : 'var(--surface)',
+              color: mode === m ? 'white' : 'var(--text2)',
+              border: mode === m ? 'none' : '1px solid var(--border)',
+              cursor: 'pointer',
+            }}
           >{m}</button>
         ))}
       </div>
@@ -47,15 +54,15 @@ export default function ComparisonPage() {
       {/* Player slots */}
       <div className="flex flex-wrap gap-3">
         {slots.map((slot, i) => (
-          <div key={slot.player.mlbam_id} className="flex items-center gap-2 bg-gray-800 rounded-lg px-3 py-2 border"
-            style={{ borderColor: PLAYER_COLORS[i] + '60' }}>
+          <div key={slot.player.mlbam_id} className="flex items-center gap-2 rounded-lg px-3 py-2"
+            style={{ background: 'white', border: `1px solid ${PLAYER_COLORS[i]}60` }}>
             <img src={slot.player.headshot_url} alt={slot.player.fullName} className="w-7 h-7 rounded-full bg-gray-700" />
             <div className="flex flex-col gap-0.5">
               <span className="text-sm text-gray-200 leading-none">{slot.player.fullName}</span>
               <select
                 value={slot.season}
                 onChange={e => updateSeason(slot.player.mlbam_id, Number(e.target.value))}
-                className="bg-gray-700 border-0 rounded text-xs text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 py-0 px-1 mt-0.5"
+                style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 11, color: 'var(--text2)', padding: '1px 4px', outline: 'none' }}
               >
                 {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>

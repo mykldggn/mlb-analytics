@@ -314,9 +314,12 @@ export default function PlayerProfilePage() {
                       <button
                         key={view}
                         onClick={() => setSplitsView(view)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                          splitsView === view ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-gray-200'
-                        }`}
+                        style={{
+                          padding: '6px 12px', borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                          background: splitsView === view ? 'var(--accent2)' : 'var(--surface)',
+                          color: splitsView === view ? 'white' : 'var(--text2)',
+                          border: splitsView === view ? 'none' : '1px solid var(--border)',
+                        }}
                       >
                         {view === 'hitting' ? 'Batting Splits' : 'Pitching Splits'}
                       </button>
@@ -519,9 +522,12 @@ function TrendSection({ playerId, isPitcher }: { playerId: number; isPitcher: bo
           <button
             key={k}
             onClick={() => setSelectedStat(k)}
-            className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-              selectedStat === k ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-gray-200'
-            }`}
+            style={{
+              padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: 'pointer',
+              background: selectedStat === k ? 'var(--accent2)' : 'var(--surface)',
+              color: selectedStat === k ? 'white' : 'var(--text2)',
+              border: selectedStat === k ? 'none' : '1px solid var(--border)',
+            }}
           >
             {STAT_DEFINITIONS[k]?.label ?? k.toUpperCase()}
           </button>

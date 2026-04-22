@@ -25,9 +25,9 @@ export default function StatCard({ statKey, value, label, delta, percentile, siz
   return (
     <div className={`card flex flex-col gap-1 ${sizeClasses[size]}`}>
       <Tooltip content={def?.description}>
-        <span className="text-xs text-gray-500 uppercase tracking-wide cursor-help">{displayLabel}</span>
+        <span style={{ fontSize: 11, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.07em', cursor: 'help' }}>{displayLabel}</span>
       </Tooltip>
-      <span className={`font-mono font-semibold ${size === 'lg' ? 'text-3xl' : size === 'md' ? 'text-2xl' : 'text-lg'} text-gray-100`}>
+      <span style={{ fontFamily: "'DM Mono', monospace", fontWeight: 600, fontSize: size === 'lg' ? '1.875rem' : size === 'md' ? '1.5rem' : '1.125rem', color: 'var(--text)' }}>
         {formatted}
       </span>
       {delta != null && (
@@ -37,13 +37,13 @@ export default function StatCard({ statKey, value, label, delta, percentile, siz
       )}
       {percentile != null && (
         <div className="flex items-center gap-2 mt-1">
-          <div className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden">
+          <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: 'var(--bg3)' }}>
             <div
               className="h-full rounded-full transition-all"
               style={{ width: `${percentile}%`, backgroundColor: percentileColor(percentile) }}
             />
           </div>
-          <span className="text-xs text-gray-500">{percentile}p</span>
+          <span style={{ fontSize: 11, color: 'var(--text3)' }}>{percentile}p</span>
         </div>
       )}
     </div>

@@ -4,79 +4,115 @@ import { CURRENT_SEASON } from '../utils/constants'
 import { formatStat } from '../utils/formatters'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 
-export default function HomePage() {
-  const { data: hrLeaders } = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'hr', order: 'desc', min_pa: 50, page_size: 5 })
-  const { data: warHitters } = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'war', order: 'desc', min_pa: 100, page_size: 5 })
-  const { data: eraLeaders } = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'fip', order: 'asc', min_ip: 50, page_size: 5 })
-
+/* ─── Baseball Diamond SVG (subtle background) ─────────────────────────── */
+function BaseballDiamondSVG() {
   return (
-    <div className="space-y-10">
-      {/* Hero */}
-      <section className="text-center py-12">
-        <div className="text-6xl mb-4">⚾</div>
-        <h1 className="text-4xl font-bold text-white mb-3">MLB Advanced Analytics</h1>
-        <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-          WAR, wRC+, Statcast metrics, Park Favorability Index, Platoon Splits, Contract Value analysis, and more —
-          {' '}<span className="text-blue-400">{CURRENT_SEASON} season</span> data plus historical records back to 2002.
-        </p>
-        <div className="flex justify-center gap-4 mt-6">
-          <Link to="/leaderboards" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
-            Leaderboards
-          </Link>
-          <Link to="/park-factors" className="bg-gray-800 hover:bg-gray-700 text-gray-200 px-6 py-2 rounded-lg font-medium transition-colors">
-            Park Factors
-          </Link>
-          <Link to="/compare" className="bg-gray-800 hover:bg-gray-700 text-gray-200 px-6 py-2 rounded-lg font-medium transition-colors">
-            Compare Players
-          </Link>
-        </div>
-      </section>
+    <svg
+      viewBox="0 0 420 380"
+      style={{
+        position: 'absolute',
+        bottom: -20,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 520,
+        height: 470,
+        opacity: 0.07,
+        pointerEvents: 'none',
+      }}
+      aria-hidden
+    >
+      {/* Outfield grass */}
+      <path d="M210 340 L30 160 L210 20 L390 160 Z" fill="#2d6a2d" />
+      {/* Infield dirt */}
+      <path d="M210 340 L120 250 L210 165 L300 250 Z" fill="#8b6340" />
+      {/* Outfield wall arc */}
+      <path d="M30 160 Q210 -30 390 160" fill="none" stroke="white" strokeWidth="3" />
+      {/* Foul lines */}
+      <line x1="210" y1="340" x2="30" y2="160" stroke="white" strokeWidth="2" />
+      <line x1="210" y1="340" x2="390" y2="160" stroke="white" strokeWidth="2" />
+      {/* Bases */}
+      <rect x="195" y="152" width="28" height="28" fill="white" rx="2" transform="rotate(45 209 166)" />
+      <rect x="107" y="237" width="22" height="22" fill="white" rx="2" transform="rotate(45 118 248)" />
+      <rect x="283" y="237" width="22" height="22" fill="white" rx="2" transform="rotate(45 294 248)" />
+      {/* Home plate */}
+      <polygon points="210,342 197,330 197,318 223,318 223,330" fill="white" />
+      {/* Pitcher's mound */}
+      <circle cx="210" cy="245" r="12" fill="#7a5530" />
+      {/* Base lines on infield */}
+      <line x1="210" y1="166" x2="118" y2="248" stroke="white" strokeWidth="1.5" />
+      <line x1="210" y1="166" x2="302" y2="248" stroke="white" strokeWidth="1.5" />
+      <line x1="118" y1="248" x2="210" y2="330" stroke="white" strokeWidth="1.5" />
+      <line x1="302" y1="248" x2="210" y2="330" stroke="white" strokeWidth="1.5" />
+    </svg>
+  )
+}
 
-      {/* Leader cards */}
-      <section>
-        <h2 className="text-lg font-semibold text-gray-200 mb-4">{CURRENT_SEASON} Leaders</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <LeaderCard title="Home Runs" statKey="hr" data={hrLeaders?.data} />
-          <LeaderCard title="Batting WAR" statKey="war" data={warHitters?.data} />
-          <LeaderCard title="FIP (Starters)" statKey="fip" data={eraLeaders?.data} lowerIsBetter />
-        </div>
-      </section>
-
-      {/* Feature cards */}
-      <section>
-        <h2 className="text-lg font-semibold text-gray-200 mb-4">Features</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            { title: 'Player Profiles', desc: 'Full stat breakdowns, career stats, headshots, Statcast metrics, and multi-year trends — search any MLB player.', link: '/leaderboards', icon: '👤' },
-            { title: 'Park Favorability Index', desc: 'Our custom PFI statistic quantifies ballpark effects on batters and pitchers (0–200 scale).', link: '/park-factors', icon: '🏟️' },
-            { title: 'Platoon Splits', desc: 'How every player performs vs left-handed and right-handed opponents — available on each player profile.', icon: '↔️', link: '/leaderboards' },
-            { title: 'Statcast Data', desc: 'xBA, xSLG, xwOBA, Barrel%, Hard Hit%, Exit Velocity, Launch Angle, Sprint Speed.', icon: '📡', link: '/leaderboards' },
-            { title: 'Spray Charts', desc: 'Visualize where every batted ball landed — colored by type. Available on each player profile page.', icon: '🗺️', link: '/leaderboards' },
-            { title: 'Player Comparison', desc: 'Side-by-side stat comparison with radar charts for up to 4 players.', icon: '⚖️', link: '/compare' },
-            { title: 'Team Analytics', desc: 'Does batting WAR, pitching WAR, or wRC+ best predict wins? Explore team-level correlations across seasons.', icon: '📊', link: '/team-analytics' },
-            { title: 'Contract Value', desc: 'Who earned their contract and who was overpaid? WAR per salary dollar for historical seasons using the Lahman database (through 2016).', icon: '💰', link: '/contract-value' },
-            { title: 'Pitch Zone Charts', desc: 'Pitcher location heatmaps — see where pitchers throw by pitch type and batter handedness using Statcast data.', icon: '🎯', link: '/pitch-zones' },
-          ].map(f => (
-            <Link key={f.title} to={f.link} className="card-hover group">
-              <div className="text-2xl mb-2">{f.icon}</div>
-              <h3 className="font-semibold text-gray-200 mb-1 group-hover:text-blue-400 transition-colors">{f.title}</h3>
-              <p className="text-sm text-gray-500">{f.desc}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
-    </div>
+/* ─── Stitch Dot Pattern ───────────────────────────────────────────────── */
+function StitchPattern() {
+  return (
+    <svg
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        opacity: 0.04,
+        pointerEvents: 'none',
+      }}
+      aria-hidden
+    >
+      <defs>
+        <pattern id="stitchPat" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+          <circle cx="10" cy="10" r="1.5" fill="#001f5b" />
+          <circle cx="30" cy="5"  r="1.5" fill="#001f5b" />
+          <circle cx="50" cy="10" r="1.5" fill="#001f5b" />
+          <circle cx="5"  cy="30" r="1.5" fill="#001f5b" />
+          <circle cx="55" cy="30" r="1.5" fill="#001f5b" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#stitchPat)" />
+    </svg>
   )
 }
 
 const RANK_BADGES = ['🥇', '🥈', '🥉']
 
-function LeaderCard({ title, statKey, data }: {
-  title: string; statKey: string; data?: unknown[]; lowerIsBetter?: boolean
+function LeaderCard({ title, statKey, data, lowerIsBetter = false }: {
+  title: string
+  statKey: string
+  data?: unknown[]
+  lowerIsBetter?: boolean
 }) {
   return (
-    <div className="card">
-      <h3 className="text-sm font-semibold text-gray-300 mb-3">{title}</h3>
+    <div
+      style={{
+        position: 'relative',
+        background: 'white',
+        border: '1px solid var(--border)',
+        borderRadius: 10,
+        padding: '20px 20px 16px',
+        overflow: 'hidden',
+        boxShadow: '0 1px 4px rgba(0,25,80,0.07)',
+        transition: 'transform 0.15s, border-color 0.15s, box-shadow 0.15s',
+      }}
+      onMouseEnter={e => {
+        ;(e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'
+        ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border2)'
+        ;(e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 12px rgba(0,25,80,0.10)'
+      }}
+      onMouseLeave={e => {
+        ;(e.currentTarget as HTMLDivElement).style.transform = 'none'
+        ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)'
+        ;(e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 4px rgba(0,25,80,0.07)'
+      }}
+    >
+      {/* Gradient bar top */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, var(--accent), var(--accent2))' }} />
+
+      <h3 style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text3)', marginBottom: 14 }}>
+        {title}
+      </h3>
+
       {!data ? (
         <LoadingSpinner size="sm" />
       ) : (
@@ -84,30 +120,241 @@ function LeaderCard({ title, statKey, data }: {
           {(data as Array<Record<string, unknown>>).map((entry, i) => (
             <li key={i} className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="text-base w-6 shrink-0 text-center">
-                  {i < 3 ? RANK_BADGES[i] : <span className="text-xs text-gray-600">{i + 1}</span>}
+                <span style={{ fontSize: 15, width: 22, textAlign: 'center', flexShrink: 0 }}>
+                  {i < 3 ? RANK_BADGES[i] : <span style={{ fontSize: 12, fontFamily: "'DM Mono', monospace", color: 'var(--text3)' }}>{i + 1}</span>}
                 </span>
                 {entry.headshot_url != null && (
-                  <img src={String(entry.headshot_url)} alt="" className="w-9 h-9 rounded-full bg-gray-700 shrink-0 object-cover" />
+                  <img
+                    src={String(entry.headshot_url)}
+                    alt=""
+                    className="w-8 h-8 rounded-full object-cover shrink-0"
+                    style={{ background: 'var(--bg3)', border: '1.5px solid rgba(0,25,80,0.12)', boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}
+                  />
                 )}
                 {entry.mlbam_id ? (
-                  <Link to={`/players/${entry.mlbam_id}`} className="text-sm text-gray-200 hover:text-blue-400 transition-colors truncate">
+                  <Link
+                    to={`/players/${entry.mlbam_id}`}
+                    style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: 'none' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent2)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--text)')}
+                  >
                     {String(entry.player_name)}
                   </Link>
                 ) : (
-                  <span className="text-sm text-gray-200 truncate">{String(entry.player_name)}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {String(entry.player_name)}
+                  </span>
                 )}
               </div>
-              <span className="font-mono text-sm text-gray-100 font-semibold shrink-0">
+              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 14, fontWeight: 700, color: lowerIsBetter ? 'var(--accent2)' : 'var(--accent2)', flexShrink: 0 }}>
                 {formatStat(statKey, (entry.stats as Record<string, unknown>)?.[statKey] as number)}
               </span>
             </li>
           ))}
         </ol>
       )}
-      <Link to="/leaderboards" className="block mt-3 text-xs text-blue-500 hover:text-blue-400 transition-colors">
+
+      <Link
+        to="/leaderboards"
+        style={{ display: 'block', marginTop: 14, fontSize: 12, fontWeight: 500, color: 'var(--accent)', textDecoration: 'none' }}
+        onMouseEnter={e => (e.currentTarget.style.color = 'var(--accentH)')}
+        onMouseLeave={e => (e.currentTarget.style.color = 'var(--accent)')}
+      >
         Full leaderboard →
       </Link>
+    </div>
+  )
+}
+
+const FEATURES = [
+  { emoji: '👤', title: 'Player Profiles',          desc: 'Headshots, full stat breakdowns, Statcast metrics, career stats & multi-year trends.' },
+  { emoji: '🏟️', title: 'Park Favorability Index',  desc: 'Our custom PFI stat quantifies ballpark effects on batters and pitchers (0–200 scale).' },
+  { emoji: '↔️', title: 'Platoon Splits',            desc: 'How every player performs vs LHP and RHP — available on each player profile page.' },
+  { emoji: '📡', title: 'Statcast Data',             desc: 'xBA, xSLG, xwOBA, Barrel%, Hard Hit%, Exit Velocity, Launch Angle, Sprint Speed.' },
+  { emoji: '🗺️', title: 'Spray Charts',             desc: 'Visualize where every batted ball landed, colored by hit type.' },
+  { emoji: '⚖️', title: 'Player Comparison',         desc: 'Side-by-side stat comparison with radar charts for up to 4 players.' },
+  { emoji: '📊', title: 'Team Analytics',            desc: 'Batting WAR, pitching WAR, wRC+, and win/loss scatter plots across seasons.' },
+  { emoji: '💰', title: 'Contract Value',            desc: 'Who earned their deal? WAR per salary dollar using Lahman salary data.' },
+  { emoji: '🎯', title: 'Pitch Zone Charts',         desc: 'Pitcher location heatmaps by pitch type and batter handedness (Statcast).' },
+]
+
+export default function HomePage() {
+  const { data: hrLeaders }   = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'hr',  order: 'desc', min_pa: 50,  page_size: 5 })
+  const { data: warHitters }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'war', order: 'desc', min_pa: 100, page_size: 5 })
+  const { data: eraLeaders }  = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'fip', order: 'asc', min_ip: 50, page_size: 5 })
+
+  return (
+    <div style={{ maxWidth: 1280, margin: '0 auto', paddingTop: 0 }}>
+
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <section style={{
+        position: 'relative',
+        minHeight: 460,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+        overflow: 'hidden',
+        padding: '56px 24px 48px',
+        background: 'linear-gradient(160deg, var(--bg2) 0%, var(--bg) 100%)',
+      }}>
+        {/* Top gradient bar */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: 'linear-gradient(90deg, var(--accent) 0%, var(--accent2) 50%, transparent 100%)' }} />
+
+        {/* Radial glow */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          background: 'radial-gradient(ellipse 60% 55% at 50% 60%, rgba(184,0,26,0.06) 0%, transparent 70%)',
+        }} />
+
+        {/* Stitch dots */}
+        <StitchPattern />
+
+        {/* Centered baseball diamond */}
+        <BaseballDiamondSVG />
+
+        {/* MLB logo */}
+        <img
+          src="/mlb-logo.png"
+          alt="MLB"
+          style={{ width: 180, objectFit: 'contain', position: 'relative', zIndex: 1, marginBottom: 24 }}
+        />
+
+        {/* Headline */}
+        <h1 style={{
+          position: 'relative', zIndex: 1,
+          fontFamily: "'Playfair Display', serif",
+          fontWeight: 900,
+          fontSize: 'clamp(2rem, 5.5vw, 3.8rem)',
+          color: 'var(--text)',
+          lineHeight: 1.1,
+          marginBottom: 16,
+          letterSpacing: '-0.02em',
+        }}>
+          MLB Advanced Analytics
+        </h1>
+
+        <p style={{
+          position: 'relative', zIndex: 1,
+          color: 'var(--text2)',
+          fontSize: 'clamp(0.9rem, 2vw, 1.05rem)',
+          lineHeight: 1.75,
+          maxWidth: 540,
+          margin: '0 auto 36px',
+        }}>
+          WAR, wRC+, Statcast metrics, Park Favorability Index, Platoon Splits, Contract Value —{' '}
+          <strong style={{ color: 'var(--accent2)' }}>{CURRENT_SEASON} season</strong> data plus records back to 2002.
+        </p>
+
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {[
+            { to: '/leaderboards',   label: 'Leaderboards', primary: true },
+            { to: '/park-factors',   label: 'Park Factors' },
+            { to: '/compare',        label: 'Compare Players' },
+          ].map(({ to, label, primary }) => (
+            <Link
+              key={to}
+              to={to}
+              style={{
+                padding: '10px 22px',
+                borderRadius: 8,
+                fontSize: 14,
+                fontWeight: 600,
+                textDecoration: 'none',
+                transition: 'background 0.15s, color 0.15s',
+                background: primary ? 'var(--accent)' : 'transparent',
+                border: primary ? 'none' : '1px solid var(--border2)',
+                color: primary ? 'white' : 'var(--text)',
+              }}
+              onMouseEnter={e => {
+                if (primary) e.currentTarget.style.background = 'var(--accentH)'
+                else e.currentTarget.style.background = 'var(--surface2)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = primary ? 'var(--accent)' : 'transparent'
+              }}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Stat Ticker ──────────────────────────────────────────────────── */}
+      <div style={{
+        background: 'var(--bg2)',
+        borderBottom: '1px solid var(--border)',
+        padding: '10px 28px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 32,
+        overflowX: 'auto',
+        flexWrap: 'nowrap',
+      }}>
+        <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', flexShrink: 0 }}>
+          {CURRENT_SEASON} Leaders
+        </span>
+        {[
+          { label: 'HR Leader', val: hrLeaders?.data?.[0] ? `${(hrLeaders.data[0] as Record<string,unknown>).player_name} — ${((hrLeaders.data[0] as Record<string,unknown>).stats as Record<string,unknown>)?.hr} HR` : '…' },
+          { label: 'WAR Leader', val: warHitters?.data?.[0] ? `${(warHitters.data[0] as Record<string,unknown>).player_name} — ${((warHitters.data[0] as Record<string,unknown>).stats as Record<string,unknown>)?.war} WAR` : '…' },
+          { label: 'FIP Leader', val: eraLeaders?.data?.[0] ? `${(eraLeaders.data[0] as Record<string,unknown>).player_name} — ${((eraLeaders.data[0] as Record<string,unknown>).stats as Record<string,unknown>)?.fip} FIP` : '…' },
+        ].map(s => (
+          <div key={s.label} style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 11, color: 'var(--text3)', fontWeight: 500 }}>{s.label}:</span>
+            <span style={{ fontSize: 12, color: 'var(--text)', fontFamily: "'DM Mono', monospace", fontWeight: 500 }}>{s.val}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Leader Cards ─────────────────────────────────────────────────── */}
+      <section style={{ padding: '40px 24px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 700, color: 'var(--text)' }}>
+            {CURRENT_SEASON} Leaders
+          </h2>
+          <span style={{ fontSize: 13, color: 'var(--text3)' }}>Through {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+          <LeaderCard title="Home Runs"    statKey="hr"  data={hrLeaders?.data} />
+          <LeaderCard title="Batting WAR"  statKey="war" data={warHitters?.data} />
+          <LeaderCard title="FIP (Starters)" statKey="fip" data={eraLeaders?.data} lowerIsBetter />
+        </div>
+      </section>
+
+      {/* ── Feature Grid ─────────────────────────────────────────────────── */}
+      <section style={{ padding: '40px 24px 48px' }}>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 700, color: 'var(--text)', marginBottom: 16 }}>
+          Features
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: 14 }}>
+          {FEATURES.map(f => (
+            <div
+              key={f.title}
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 10,
+                padding: '16px 18px',
+                transition: 'border-color 0.15s, transform 0.15s',
+                cursor: 'default',
+              }}
+              onMouseEnter={e => {
+                ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--accent)'
+                ;(e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'
+              }}
+              onMouseLeave={e => {
+                ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)'
+                ;(e.currentTarget as HTMLDivElement).style.transform = 'none'
+              }}
+            >
+              <div style={{ fontSize: 28, marginBottom: 8 }}>{f.emoji}</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{f.title}</div>
+              <div style={{ fontSize: 12.5, color: 'var(--text2)', lineHeight: 1.65 }}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }

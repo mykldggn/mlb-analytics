@@ -13,16 +13,23 @@ export default function TabGroup({ tabs, defaultTab, children, onTabChange }: Pr
   const [active, setActive] = useState(defaultTab ?? tabs[0]?.key)
   return (
     <div>
-      <div className="flex gap-1 border-b border-gray-800 mb-4">
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border2)', marginBottom: 16 }}>
         {tabs.map(t => (
           <button
             key={t.key}
             onClick={() => { setActive(t.key); onTabChange?.(t.key) }}
-            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              active === t.key
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-300'
-            }`}
+            style={{
+              padding: '8px 16px',
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: 'pointer',
+              background: 'none',
+              border: 'none',
+              borderBottom: `2px solid ${active === t.key ? 'var(--accent)' : 'transparent'}`,
+              marginBottom: -1,
+              color: active === t.key ? 'var(--accent)' : 'var(--text3)',
+              transition: 'color 0.15s, border-color 0.15s',
+            }}
           >
             {t.label}
           </button>

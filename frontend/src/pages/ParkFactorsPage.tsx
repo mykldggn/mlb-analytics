@@ -37,7 +37,7 @@ export default function ParkFactorsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Park Favorability Index (PFI)</h1>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Park Favorability Index (PFI)</h1>
           <p className="text-gray-500 text-sm mt-1 max-w-2xl">
             A custom composite statistic (0–200 scale, 100 = neutral) measuring how much each ballpark
             helps batters or pitchers relative to league-average conditions. Uses a 3-year rolling Statcast window.
@@ -46,16 +46,16 @@ export default function ParkFactorsPage() {
         <select
           value={season}
           onChange={e => setSeason(Number(e.target.value))}
-          className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
+          style={{ background: 'white', border: '1px solid var(--border2)', borderRadius: 8, padding: '6px 12px', fontSize: 13, color: 'var(--text)', outline: 'none' }}
         >
           {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
 
       {/* Methodology card */}
-      <div className="card border-blue-900/50 bg-blue-950/20">
-        <h3 className="text-sm font-semibold text-blue-300 mb-2">PFI Methodology</h3>
-        <p className="text-xs text-gray-400 leading-relaxed">
+      <div className="card" style={{ borderColor: 'rgba(0,31,91,0.18)', background: 'rgba(0,31,91,0.04)' }}>
+        <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent2)', marginBottom: 8 }}>PFI Methodology</h3>
+        <p style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.7 }}>
           The Batter PFI weights six factors from home vs. road Statcast splits across a 3-year window:{' '}
           <span className="text-gray-300">Run Factor (30%)</span>,{' '}
           <span className="text-gray-300">HR Factor (30%)</span>,{' '}
@@ -102,13 +102,23 @@ function ParkTable({ parks, seasonsUsed }: { parks: ParkFactorEntry[]; seasonsUs
       <div className="flex gap-2 mb-4">
         <button
           onClick={() => setSortKey('batter_pfi')}
-          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${sortKey === 'batter_pfi' ? 'bg-orange-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-gray-200'}`}
+          style={{
+            padding: '6px 16px', borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: 'pointer',
+            background: sortKey === 'batter_pfi' ? 'var(--accent)' : 'var(--surface)',
+            color: sortKey === 'batter_pfi' ? 'white' : 'var(--text2)',
+            border: sortKey === 'batter_pfi' ? 'none' : '1px solid var(--border)',
+          }}
         >
           Batter PFI
         </button>
         <button
           onClick={() => setSortKey('pitcher_pfi')}
-          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${sortKey === 'pitcher_pfi' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-gray-200'}`}
+          style={{
+            padding: '6px 16px', borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: 'pointer',
+            background: sortKey === 'pitcher_pfi' ? 'var(--accent2)' : 'var(--surface)',
+            color: sortKey === 'pitcher_pfi' ? 'white' : 'var(--text2)',
+            border: sortKey === 'pitcher_pfi' ? 'none' : '1px solid var(--border)',
+          }}
         >
           Pitcher PFI
         </button>

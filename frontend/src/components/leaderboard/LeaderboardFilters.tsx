@@ -1,5 +1,15 @@
 import { SEASONS } from '../../utils/constants'
 
+const ctrlStyle: React.CSSProperties = {
+  background: 'white',
+  border: '1px solid var(--border2)',
+  borderRadius: 8,
+  padding: '5px 10px',
+  fontSize: 13,
+  color: 'var(--text)',
+  outline: 'none',
+}
+
 interface Props {
   season: number
   onSeasonChange: (s: number) => void
@@ -14,24 +24,20 @@ export default function LeaderboardFilters({ season, onSeasonChange, minPa, onMi
   return (
     <div className="flex flex-wrap items-center gap-3 mb-4">
       <div className="flex items-center gap-2">
-        <label className="text-xs text-gray-500">Season</label>
-        <select
-          value={season}
-          onChange={e => onSeasonChange(Number(e.target.value))}
-          className="bg-gray-800 border border-gray-700 rounded-lg px-2 py-1 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
-        >
+        <label style={{ fontSize: 12, color: 'var(--text3)' }}>Season</label>
+        <select value={season} onChange={e => onSeasonChange(Number(e.target.value))} style={ctrlStyle}>
           {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
 
       {mode === 'batting' && onMinPaChange && (
         <div className="flex items-center gap-2">
-          <label className="text-xs text-gray-500">Min PA</label>
+          <label style={{ fontSize: 12, color: 'var(--text3)' }}>Min PA</label>
           <input
             type="number"
             value={minPa ?? 100}
             onChange={e => onMinPaChange(Number(e.target.value))}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-2 py-1 text-sm text-gray-200 w-20 focus:outline-none focus:border-blue-500"
+            style={{ ...ctrlStyle, width: 80 }}
             min={0} max={700} step={25}
           />
         </div>
@@ -39,12 +45,12 @@ export default function LeaderboardFilters({ season, onSeasonChange, minPa, onMi
 
       {mode === 'pitching' && onMinIpChange && (
         <div className="flex items-center gap-2">
-          <label className="text-xs text-gray-500">Min IP</label>
+          <label style={{ fontSize: 12, color: 'var(--text3)' }}>Min IP</label>
           <input
             type="number"
             value={minIp ?? 40}
             onChange={e => onMinIpChange(Number(e.target.value))}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-2 py-1 text-sm text-gray-200 w-20 focus:outline-none focus:border-blue-500"
+            style={{ ...ctrlStyle, width: 80 }}
             min={0} max={300} step={10}
           />
         </div>

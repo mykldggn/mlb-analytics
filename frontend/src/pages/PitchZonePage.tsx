@@ -84,7 +84,7 @@ export default function PitchZonePage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Pitch Zone Chart</h1>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Pitch Zone Chart</h1>
         <p className="text-gray-500 text-sm mt-1 max-w-2xl">
           Pitch location frequency heatmap — where pitchers throw by pitch type and batter handedness.
         </p>
@@ -98,7 +98,7 @@ export default function PitchZonePage() {
             value={query}
             onChange={e => { setQuery(e.target.value); setDropdownOpen(true) }}
             placeholder="Search pitcher..."
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+            style={{ width: '100%', background: 'white', border: '1px solid var(--border2)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--text)', outline: 'none' }}
           />
           {dropdownOpen && results && results.length > 0 && (
             <div className="absolute top-full mt-1 w-full bg-gray-900 border border-gray-700 rounded-lg shadow-xl overflow-hidden z-50">
@@ -126,7 +126,7 @@ export default function PitchZonePage() {
         <select
           value={season}
           onChange={e => setSeason(Number(e.target.value))}
-          className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
+          style={{ background: 'white', border: '1px solid var(--border2)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--text)', outline: 'none' }}
         >
           {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
