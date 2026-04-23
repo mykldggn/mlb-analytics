@@ -103,7 +103,7 @@ export default function Navbar() {
             style={{ width: 48, height: 33, objectFit: 'contain' }}
           />
           <span style={{
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "'Barlow Condensed', sans-serif",
             fontSize: 17,
             fontWeight: 900,
             color: scrolled ? '#eef2ff' : 'var(--text)',
@@ -113,7 +113,7 @@ export default function Navbar() {
             MLB{' '}
           </span>
           <span style={{
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "'Barlow Condensed', sans-serif",
             fontSize: 17,
             fontWeight: 700,
             fontStyle: 'italic',

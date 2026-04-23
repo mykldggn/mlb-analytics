@@ -29,7 +29,7 @@
   body {
     background-color: var(--bg);
     color: var(--text);
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Barlow', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     /* Pinstripe texture */
     background-image: repeating-linear-gradient(

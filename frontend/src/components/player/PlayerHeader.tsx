@@ -30,7 +30,7 @@ export default function PlayerHeader({ player }: Props) {
 
         {/* Bio */}
         <div className="flex-1 min-w-0">
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.6rem', fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{String(player.fullName ?? '')}</h1>
+          <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '1.6rem', fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{String(player.fullName ?? '')}</h1>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
             <span style={{ color: 'var(--text2)', fontSize: 14 }}>{String(player.currentTeam ?? '—')}</span>
             <span style={{ color: 'var(--text3)' }}>·</span>

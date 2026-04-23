@@ -283,7 +283,7 @@ export default function TeamAnalyticsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Team Historical Analytics</h1>
+          <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Team Historical Analytics</h1>
           <p className="text-gray-500 text-sm mt-1 max-w-2xl">
             {isAllSeasons
               ? 'Per-season averages across 2015–' + CURRENT_SEASON + '. Rate stats (win%, wRC+, FIP) are averaged; WAR is averaged per season to normalize for franchise history.'

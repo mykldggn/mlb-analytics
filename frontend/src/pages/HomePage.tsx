@@ -227,7 +227,7 @@ export default function HomePage() {
         {/* Headline */}
         <h1 style={{
           position: 'relative', zIndex: 1,
-          fontFamily: "'Playfair Display', serif",
+          fontFamily: "'Barlow Condensed', sans-serif",
           fontWeight: 900,
           fontSize: 'clamp(2rem, 5.5vw, 3.8rem)',
           color: 'var(--text)',
@@ -316,7 +316,7 @@ export default function HomePage() {
       {/* ── Leader Cards ─────────────────────────────────────────────────── */}
       <section style={{ padding: '40px 24px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 700, color: 'var(--text)' }}>
+          <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 700, color: 'var(--text)' }}>
             {CURRENT_SEASON} Leaders
           </h2>
           <span style={{ fontSize: 13, color: 'var(--text3)' }}>Through {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</span>
@@ -330,7 +330,7 @@ export default function HomePage() {
 
       {/* ── Feature Grid ─────────────────────────────────────────────────── */}
       <section style={{ padding: '40px 24px 48px' }}>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 700, color: 'var(--text)', marginBottom: 16 }}>
+        <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 700, color: 'var(--text)', marginBottom: 16 }}>
           Features
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: 14 }}>

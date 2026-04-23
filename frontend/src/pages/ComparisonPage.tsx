@@ -33,7 +33,7 @@ export default function ComparisonPage() {
 
   return (
     <div className="space-y-6">
-      <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Player Comparison</h1>
+      <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Player Comparison</h1>
 
       {/* Mode toggle */}
       <div className="flex gap-2">

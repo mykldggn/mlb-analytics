@@ -10,9 +10,9 @@ export default {
         'mlb-cream': '#f3f0e8',
       },
       fontFamily: {
-        sans: ["'DM Sans'", 'system-ui', 'sans-serif'],
+        sans: ["'Barlow'", 'system-ui', 'sans-serif'],
         mono: ["'DM Mono'", 'monospace'],
-        serif: ["'Playfair Display'", 'Georgia', 'serif'],
+        serif: ["'Barlow Condensed'", 'system-ui', 'sans-serif'],
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

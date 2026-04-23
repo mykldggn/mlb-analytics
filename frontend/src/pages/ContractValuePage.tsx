@@ -108,7 +108,7 @@ export default function ContractValuePage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Contract Value</h1>
+          <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Contract Value</h1>
           <p className="text-gray-500 text-sm mt-1 max-w-2xl">
             WAR per salary dollar — who earned their contract and who was overpaid?
             Salary data from the Lahman database{data?.max_year ? ` (available through ${data.max_year})` : ''}.

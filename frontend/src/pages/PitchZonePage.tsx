@@ -84,7 +84,7 @@ export default function PitchZonePage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Pitch Zone Chart</h1>
+        <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Pitch Zone Chart</h1>
         <p className="text-gray-500 text-sm mt-1 max-w-2xl">
           Pitch location frequency heatmap — where pitchers throw by pitch type and batter handedness.
         </p>

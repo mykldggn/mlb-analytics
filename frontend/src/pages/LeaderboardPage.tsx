@@ -36,7 +36,7 @@ export default function LeaderboardPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Leaderboards</h1>
+        <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Leaderboards</h1>
         <div className="flex items-center gap-3">
           {warmupState === 'done' && warmupResult ? (
             <span style={{ fontSize: 11, color: '#059669' }}>

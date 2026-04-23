@@ -48,7 +48,7 @@ export default function ParkFactorsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Park Favorability Index (PFI)</h1>
+          <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>Park Favorability Index (PFI)</h1>
           <p className="text-gray-500 text-sm mt-1 max-w-2xl">
             A custom composite statistic (0–200 scale, 100 = neutral) measuring how much each ballpark
             helps batters or pitchers relative to league-average conditions. Uses a 3-year rolling Statcast window.
