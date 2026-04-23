@@ -6,12 +6,23 @@ import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { ParkFactorEntry } from '../api/parkFactors'
 import { getParkInfo, ParkInfo } from '../utils/parkData'
 
+// MLB color scale: maroon (extreme hitter) → red → neutral gray → blue → navy (extreme pitcher)
+function pfiColor(value: number): string {
+  if (value > 115) return '#7f0012'  // maroon — extreme hitter
+  if (value > 105) return '#b8001a'  // MLB red — hitter-friendly
+  if (value > 100) return '#d44a2a'  // red-orange — slightly hitter
+  if (value < 85)  return '#001f5b'  // MLB navy — extreme pitcher
+  if (value < 95)  return '#1d4ed8'  // blue — pitcher-friendly
+  if (value < 100) return '#3b82f6'  // lighter blue — slightly pitcher
+  return '#7a8fa8'                   // neutral gray
+}
+
 function PFIBar({ value, max = 200 }: { value: number; max?: number }) {
   const pct = (value / max) * 100
-  const color = value > 110 ? '#ef4444' : value > 100 ? '#f97316' : value < 90 ? '#34d399' : value < 100 ? '#60a5fa' : '#9ca3af'
+  const color = pfiColor(value)
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
+      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg3)' }}>
         <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
       </div>
       <span className="font-mono text-xs w-10 text-right" style={{ color }}>{formatPFI(value)}</span>
@@ -20,13 +31,13 @@ function PFIBar({ value, max = 200 }: { value: number; max?: number }) {
 }
 
 function interpretColor(text: string): string {
-  if (text.includes('Extreme hitter')) return 'text-red-400'
-  if (text.includes('Hitter')) return 'text-orange-400'
-  if (text.includes('Slightly hitter')) return 'text-amber-400'
-  if (text.includes('Neutral')) return 'text-gray-400'
-  if (text.includes('Slightly pitcher')) return 'text-sky-400'
-  if (text.includes('Pitcher')) return 'text-blue-400'
-  return 'text-green-400'
+  if (text.includes('Extreme hitter')) return '#7f0012'
+  if (text.includes('Hitter'))         return '#b8001a'
+  if (text.includes('Slightly hitter')) return '#d44a2a'
+  if (text.includes('Neutral'))        return '#7a8fa8'
+  if (text.includes('Slightly pitcher')) return '#3b82f6'
+  if (text.includes('Pitcher'))        return '#1d4ed8'
+  return '#001f5b'
 }
 
 export default function ParkFactorsPage() {
@@ -137,7 +148,7 @@ function ParkTable({ parks, seasonsUsed }: { parks: ParkFactorEntry[]; seasonsUs
               <div className="w-48 shrink-0">
                 <div className="font-medium text-gray-200 text-sm">{park.park_name}</div>
                 <div className="text-xs text-gray-500">{park.team_abbr}</div>
-                <div className={`text-xs mt-0.5 ${interpretColor(park.interpretation)}`}>{park.interpretation}</div>
+                <div className="text-xs mt-0.5" style={{ color: interpretColor(park.interpretation) }}>{park.interpretation}</div>
               </div>
 
               {/* PFI bars */}
@@ -249,14 +260,14 @@ function ParkDetailModal({ park, onClose }: { park: ParkFactorEntry & { info?: P
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-gray-800 rounded-xl p-4 text-center">
               <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Batter PFI</div>
-              <div className={`text-3xl font-bold ${park.batter_pfi > 110 ? 'text-red-400' : park.batter_pfi > 100 ? 'text-orange-400' : park.batter_pfi < 90 ? 'text-emerald-400' : 'text-gray-300'}`}>
+              <div className="text-3xl font-bold" style={{ color: pfiColor(park.batter_pfi) }}>
                 {formatPFI(park.batter_pfi)}
               </div>
               <div className="text-xs text-gray-500 mt-1">{park.interpretation}</div>
             </div>
             <div className="bg-gray-800 rounded-xl p-4 text-center">
               <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Pitcher PFI</div>
-              <div className={`text-3xl font-bold ${park.pitcher_pfi > 110 ? 'text-emerald-400' : park.pitcher_pfi < 90 ? 'text-red-400' : 'text-gray-300'}`}>
+              <div className="text-3xl font-bold" style={{ color: pfiColor(park.pitcher_pfi) }}>
                 {formatPFI(park.pitcher_pfi)}
               </div>
               <div className="text-xs text-gray-500 mt-1">Pitcher friendliness</div>
