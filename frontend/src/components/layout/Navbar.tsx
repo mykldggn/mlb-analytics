@@ -104,24 +104,12 @@ export default function Navbar() {
           />
           <span style={{
             fontFamily: "'Barlow Condensed', sans-serif",
-            fontSize: 17,
-            fontWeight: 900,
-            color: scrolled ? '#eef2ff' : 'var(--text)',
-            letterSpacing: '-0.02em',
-            lineHeight: 1,
-          }}>
-            MLB{' '}
-          </span>
-          <span style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontSize: 17,
-            fontWeight: 700,
-            fontStyle: 'italic',
-            color: 'var(--accent2)',
+            fontSize: 18,
+            fontWeight: 800,
             letterSpacing: '-0.01em',
             lineHeight: 1,
           }}>
-            Analytics
+            <span style={{ color: scrolled ? '#eef2ff' : 'var(--text)' }}>MLB </span><span style={{ color: 'var(--accent2)', fontStyle: 'italic' }}>Analytics</span>
           </span>
         </Link>
 
