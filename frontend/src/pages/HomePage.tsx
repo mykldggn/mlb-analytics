@@ -183,9 +183,9 @@ export default function HomePage() {
   const { data: eraLeaders }  = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'fip', order: 'asc', min_ip: 50, page_size: 5 })
 
   return (
-    <div style={{ maxWidth: 1280, margin: '0 auto', paddingTop: 0 }}>
+    <div>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      {/* ── Hero — full bleed, escapes the AppLayout container ───────────── */}
       <section style={{
         position: 'relative',
         minHeight: 460,
@@ -196,6 +196,10 @@ export default function HomePage() {
         textAlign: 'center',
         overflow: 'hidden',
         padding: '56px 24px 48px',
+        /* Escape the AppLayout px-4 container on both sides */
+        marginLeft: 'calc(-50vw + 50%)',
+        marginRight: 'calc(-50vw + 50%)',
+        width: '100vw',
         background: 'linear-gradient(160deg, var(--bg2) 0%, var(--bg) 100%)',
       }}>
         {/* Top gradient bar */}
@@ -280,7 +284,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Stat Ticker ──────────────────────────────────────────────────── */}
+      {/* ── Stat Ticker — full bleed ─────────────────────────────────────── */}
       <div style={{
         background: 'var(--bg2)',
         borderBottom: '1px solid var(--border)',
@@ -290,6 +294,9 @@ export default function HomePage() {
         gap: 32,
         overflowX: 'auto',
         flexWrap: 'nowrap',
+        marginLeft: 'calc(-50vw + 50%)',
+        marginRight: 'calc(-50vw + 50%)',
+        width: '100vw',
       }}>
         <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', flexShrink: 0 }}>
           {CURRENT_SEASON} Leaders
