@@ -104,7 +104,10 @@ function BattingBoard() {
         <LoadingSpinner label="Loading batting leaderboard..." />
       ) : (
         <>
-          <div className={isFetching ? 'opacity-60 transition-opacity' : ''}>
+          <div
+            className={isFetching ? 'opacity-60 transition-opacity' : ''}
+            style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,25,80,0.06)' }}
+          >
             <LeaderboardTable
               data={(data?.data ?? []) as Parameters<typeof LeaderboardTable>[0]['data']}
               visibleStats={BATTING_VISIBLE}
@@ -148,7 +151,10 @@ function PitchingBoard() {
         <LoadingSpinner label="Loading pitching leaderboard..." />
       ) : (
         <>
-          <div className={isFetching ? 'opacity-60 transition-opacity' : ''}>
+          <div
+            className={isFetching ? 'opacity-60 transition-opacity' : ''}
+            style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,25,80,0.06)' }}
+          >
             <LeaderboardTable
               data={(data?.data ?? []) as Parameters<typeof LeaderboardTable>[0]['data']}
               visibleStats={PITCHING_VISIBLE}

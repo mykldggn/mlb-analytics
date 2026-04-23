@@ -24,14 +24,15 @@ const PITCH_TYPE_LABELS: Record<string, string> = {
   ST: 'Sweeper', SV: 'Slurve', KN: 'Knuckleball', EP: 'Eephus',
 }
 
+// Solid colors — identical on dark SVG bg and white legend swatches
 function heatColor(pct: number, max: number): string {
-  if (max === 0) return 'rgba(30,41,59,0.5)'
+  if (max === 0) return '#1e293b'
   const t = Math.min(pct / (max * 0.8), 1)
-  if (t < 0.2) return `rgba(30,58,138,${0.3 + t * 1.5})`
-  if (t < 0.4) return `rgba(37,99,235,${0.4 + t})`
-  if (t < 0.6) return `rgba(234,179,8,${0.5 + t * 0.5})`
-  if (t < 0.8) return `rgba(249,115,22,${0.7 + t * 0.3})`
-  return `rgba(239,68,68,${0.85 + t * 0.15})`
+  if (t < 0.2) return '#1e3a8a'  // dark navy
+  if (t < 0.4) return '#2563eb'  // blue
+  if (t < 0.6) return '#ca8a04'  // amber/gold
+  if (t < 0.8) return '#ea580c'  // orange
+  return '#dc2626'               // red
 }
 
 const SPLITS = [
@@ -64,11 +65,11 @@ export default function PitchZoneChart({ playerId, season }: { playerId: number;
     : 0.01
 
   const HEAT_LEGEND = [
-    { t: 0.08, label: 'Low frequency' },
-    { t: 0.32, label: 'Below average' },
-    { t: 0.55, label: 'Average' },
-    { t: 0.78, label: 'High' },
-    { t: 1.00, label: `Peak (${maxPct.toFixed(1)}%)` },
+    { color: '#1e3a8a', label: 'Low frequency' },
+    { color: '#2563eb', label: 'Below average' },
+    { color: '#ca8a04', label: 'Average' },
+    { color: '#ea580c', label: 'High' },
+    { color: '#dc2626', label: `Peak (${maxPct.toFixed(1)}%)` },
   ]
 
   const btnBase: React.CSSProperties = {
@@ -208,11 +209,11 @@ export default function PitchZoneChart({ playerId, season }: { playerId: number;
                 Heat Scale
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {HEAT_LEGEND.map(({ t, label }) => (
+                {HEAT_LEGEND.map(({ color, label }) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{
                       width: 16, height: 16, borderRadius: 3, flexShrink: 0,
-                      background: heatColor(t * maxPct, maxPct),
+                      background: color,
                       border: '1px solid rgba(0,0,0,0.12)',
                     }} />
                     <span style={{ fontSize: 12, color: 'var(--text2)' }}>{label}</span>

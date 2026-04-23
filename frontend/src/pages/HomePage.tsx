@@ -291,17 +291,17 @@ export default function HomePage() {
         overflowX: 'auto',
         flexWrap: 'nowrap',
       }}>
-        <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', flexShrink: 0 }}>
+        <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', flexShrink: 0 }}>
           {CURRENT_SEASON} Leaders
         </span>
         {[
           { label: 'HR Leader', val: hrLeaders?.data?.[0] ? `${(hrLeaders.data[0] as Record<string,unknown>).player_name} — ${((hrLeaders.data[0] as Record<string,unknown>).stats as Record<string,unknown>)?.hr} HR` : '…' },
-          { label: 'WAR Leader', val: warHitters?.data?.[0] ? `${(warHitters.data[0] as Record<string,unknown>).player_name} — ${((warHitters.data[0] as Record<string,unknown>).stats as Record<string,unknown>)?.war} WAR` : '…' },
+          { label: 'WAR Leader', val: warHitters?.data?.[0] ? `${(warHitters.data[0] as Record<string,unknown>).player_name} — ${Number(((warHitters.data[0] as Record<string,unknown>).stats as Record<string,unknown>)?.war).toFixed(1)} WAR` : '…' },
           { label: 'FIP Leader', val: eraLeaders?.data?.[0] ? `${(eraLeaders.data[0] as Record<string,unknown>).player_name} — ${((eraLeaders.data[0] as Record<string,unknown>).stats as Record<string,unknown>)?.fip} FIP` : '…' },
         ].map(s => (
           <div key={s.label} style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: 11, color: 'var(--text3)', fontWeight: 500 }}>{s.label}:</span>
-            <span style={{ fontSize: 12, color: 'var(--text)', fontFamily: "'DM Mono', monospace", fontWeight: 500 }}>{s.val}</span>
+            <span style={{ fontSize: 13, color: 'var(--text3)', fontWeight: 600 }}>{s.label}:</span>
+            <span style={{ fontSize: 14, color: 'var(--text)', fontFamily: "'DM Mono', monospace", fontWeight: 500 }}>{s.val}</span>
           </div>
         ))}
       </div>
