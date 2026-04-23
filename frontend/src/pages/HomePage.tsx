@@ -3,7 +3,7 @@ import { useBattingLeaderboard, usePitchingLeaderboard } from '../hooks/useLeade
 import { CURRENT_SEASON } from '../utils/constants'
 import { formatStat } from '../utils/formatters'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 
 /* ─── Baseball Diamond SVG (subtle background) ─────────────────────────── */
 function BaseballDiamondSVG() {
@@ -178,55 +178,35 @@ const FEATURES = [
   { emoji: '🎯', title: 'Pitch Zone Charts',         desc: 'Pitcher location heatmaps by pitch type and batter handedness (Statcast).' },
 ]
 
+// ~200px per item at this font size; speed = 80px/s
 function StatCrawler({ items }: { items: { label: string; val: string }[] }) {
   const trackRef = useRef<HTMLDivElement>(null)
-  const [duration, setDuration] = useState(40)
-
-  useEffect(() => {
-    if (trackRef.current) {
-      // Speed: ~120px/s
-      const w = trackRef.current.scrollWidth / 2
-      setDuration(Math.max(20, w / 120))
-    }
-  }, [items])
-
   if (items.length === 0) return null
 
-  const renderItems = (items: { label: string; val: string }[]) =>
-    items.map((s, i) => (
+  // Derive duration purely from item count — no state, no re-render, no jump
+  const duration = Math.max(20, items.length * 200 / 80)
+
+  const renderItems = (set: { label: string; val: string }[]) =>
+    set.map((s, i) => (
       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         <span style={{ fontSize: 11, color: 'var(--text3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</span>
         <span style={{ fontSize: 13, color: 'var(--text)', fontFamily: "'DM Mono', monospace", fontWeight: 500 }}>{s.val}</span>
-        {/* dot separator */}
         <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--border2)', flexShrink: 0, margin: '0 8px' }} />
       </div>
     ))
 
   return (
     <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-      {/* Fade edges */}
       <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 40, background: 'linear-gradient(90deg, var(--bg2), transparent)', zIndex: 1, pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 40, background: 'linear-gradient(270deg, var(--bg2), transparent)', zIndex: 1, pointerEvents: 'none' }} />
       <div
         ref={trackRef}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0,
-          animation: `crawl ${duration}s linear infinite`,
-          width: 'max-content',
-        }}
+        style={{ display: 'flex', alignItems: 'center', width: 'max-content', animation: `crawl ${duration}s linear infinite` }}
       >
         {renderItems(items)}
-        {/* duplicate for seamless loop */}
         {renderItems(items)}
       </div>
-      <style>{`
-        @keyframes crawl {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-50%); }
-        }
-      `}</style>
+      <style>{`@keyframes crawl { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
     </div>
   )
 }
