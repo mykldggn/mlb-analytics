@@ -3,6 +3,7 @@ import { useBattingLeaderboard, usePitchingLeaderboard } from '../hooks/useLeade
 import { CURRENT_SEASON } from '../utils/constants'
 import { formatStat } from '../utils/formatters'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
+import { useEffect, useRef, useState } from 'react'
 
 /* ─── Baseball Diamond SVG (subtle background) ─────────────────────────── */
 function BaseballDiamondSVG() {
@@ -177,10 +178,86 @@ const FEATURES = [
   { emoji: '🎯', title: 'Pitch Zone Charts',         desc: 'Pitcher location heatmaps by pitch type and batter handedness (Statcast).' },
 ]
 
+function StatCrawler({ items }: { items: { label: string; val: string }[] }) {
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [duration, setDuration] = useState(40)
+
+  useEffect(() => {
+    if (trackRef.current) {
+      // Speed: ~120px/s
+      const w = trackRef.current.scrollWidth / 2
+      setDuration(Math.max(20, w / 120))
+    }
+  }, [items])
+
+  if (items.length === 0) return null
+
+  const renderItems = (items: { label: string; val: string }[]) =>
+    items.map((s, i) => (
+      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <span style={{ fontSize: 11, color: 'var(--text3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</span>
+        <span style={{ fontSize: 13, color: 'var(--text)', fontFamily: "'DM Mono', monospace", fontWeight: 500 }}>{s.val}</span>
+        {/* dot separator */}
+        <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--border2)', flexShrink: 0, margin: '0 8px' }} />
+      </div>
+    ))
+
+  return (
+    <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+      {/* Fade edges */}
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 40, background: 'linear-gradient(90deg, var(--bg2), transparent)', zIndex: 1, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 40, background: 'linear-gradient(270deg, var(--bg2), transparent)', zIndex: 1, pointerEvents: 'none' }} />
+      <div
+        ref={trackRef}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0,
+          animation: `crawl ${duration}s linear infinite`,
+          width: 'max-content',
+        }}
+      >
+        {renderItems(items)}
+        {/* duplicate for seamless loop */}
+        {renderItems(items)}
+      </div>
+      <style>{`
+        @keyframes crawl {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
 export default function HomePage() {
-  const { data: hrLeaders }   = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'hr',  order: 'desc', min_pa: 50,  page_size: 5 })
-  const { data: warHitters }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'war', order: 'desc', min_pa: 100, page_size: 5 })
-  const { data: eraLeaders }  = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'fip', order: 'asc', min_ip: 50, page_size: 5 })
+  const { data: hrLeaders }   = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'hr',   order: 'desc', min_pa: 50,  page_size: 1 })
+  const { data: warHitters }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'war',  order: 'desc', min_pa: 100, page_size: 5 })
+  const { data: eraLeaders }  = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'fip', order: 'asc',  min_ip: 50,  page_size: 1 })
+  const { data: avgLeaders }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'avg',  order: 'desc', min_pa: 100, page_size: 1 })
+  const { data: wrcLeaders }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'wrc_plus', order: 'desc', min_pa: 100, page_size: 1 })
+  const { data: rbiLeaders }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'rbi',  order: 'desc', min_pa: 50,  page_size: 1 })
+  const { data: sbLeaders }   = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'sb',   order: 'desc', min_pa: 50,  page_size: 1 })
+  const { data: kLeaders }    = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'k_per_9', order: 'desc', min_ip: 30, page_size: 1 })
+  const { data: eraLow }      = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'era', order: 'asc',  min_ip: 50,  page_size: 1 })
+
+  type D = Record<string, unknown>
+  const top = (d: typeof hrLeaders) => d?.data?.[0] as D | undefined
+  const stat = (d: typeof hrLeaders, key: string) => (top(d)?.stats as D)?.[key]
+  const name = (d: typeof hrLeaders) => top(d)?.player_name as string | undefined
+
+  const crawlItems = [
+    name(hrLeaders)  && { label: 'HR',    val: `${name(hrLeaders)} — ${stat(hrLeaders, 'hr')}` },
+    name(warHitters) && { label: 'WAR',   val: `${name(warHitters)} — ${Number(stat(warHitters, 'war')).toFixed(1)}` },
+    name(avgLeaders) && { label: 'AVG',   val: `${name(avgLeaders)} — .${String(Math.round(Number(stat(avgLeaders, 'avg')) * 1000)).padStart(3, '0')}` },
+    name(wrcLeaders) && { label: 'wRC+',  val: `${name(wrcLeaders)} — ${stat(wrcLeaders, 'wrc_plus')}` },
+    name(rbiLeaders) && { label: 'RBI',   val: `${name(rbiLeaders)} — ${stat(rbiLeaders, 'rbi')}` },
+    name(sbLeaders)  && { label: 'SB',    val: `${name(sbLeaders)} — ${stat(sbLeaders, 'sb')}` },
+    name(eraLow)     && { label: 'ERA',   val: `${name(eraLow)} — ${stat(eraLow, 'era')}` },
+    name(kLeaders)   && { label: 'K/9',   val: `${name(kLeaders)} — ${Number(stat(kLeaders, 'k_per_9')).toFixed(1)}` },
+    name(eraLeaders) && { label: 'FIP',   val: `${name(eraLeaders)} — ${stat(eraLeaders, 'fip')}` },
+  ].filter(Boolean) as { label: string; val: string }[]
 
   return (
     <div>
@@ -284,33 +361,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Stat Ticker — full bleed ─────────────────────────────────────── */}
+      {/* ── Stat Crawler — full bleed ────────────────────────────────────── */}
       <div style={{
         background: 'var(--bg2)',
+        borderTop: '1px solid var(--border)',
         borderBottom: '1px solid var(--border)',
-        padding: '10px 28px',
+        padding: '9px 0',
         display: 'flex',
         alignItems: 'center',
-        gap: 32,
-        overflowX: 'auto',
-        flexWrap: 'nowrap',
+        overflow: 'hidden',
         marginLeft: 'calc(-50vw + 50%)',
         marginRight: 'calc(-50vw + 50%)',
         width: '100vw',
       }}>
-        <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', flexShrink: 0 }}>
+        {/* Fixed label */}
+        <div style={{
+          flexShrink: 0,
+          padding: '0 16px',
+          borderRight: '1px solid var(--border2)',
+          marginRight: 16,
+          fontSize: 11,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.12em',
+          color: 'var(--accent)',
+          whiteSpace: 'nowrap',
+        }}>
           {CURRENT_SEASON} Leaders
-        </span>
-        {[
-          { label: 'HR Leader', val: hrLeaders?.data?.[0] ? `${(hrLeaders.data[0] as Record<string,unknown>).player_name} — ${((hrLeaders.data[0] as Record<string,unknown>).stats as Record<string,unknown>)?.hr} HR` : '…' },
-          { label: 'WAR Leader', val: warHitters?.data?.[0] ? `${(warHitters.data[0] as Record<string,unknown>).player_name} — ${Number(((warHitters.data[0] as Record<string,unknown>).stats as Record<string,unknown>)?.war).toFixed(1)} WAR` : '…' },
-          { label: 'FIP Leader', val: eraLeaders?.data?.[0] ? `${(eraLeaders.data[0] as Record<string,unknown>).player_name} — ${((eraLeaders.data[0] as Record<string,unknown>).stats as Record<string,unknown>)?.fip} FIP` : '…' },
-        ].map(s => (
-          <div key={s.label} style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: 13, color: 'var(--text3)', fontWeight: 600 }}>{s.label}:</span>
-            <span style={{ fontSize: 14, color: 'var(--text)', fontFamily: "'DM Mono', monospace", fontWeight: 500 }}>{s.val}</span>
-          </div>
-        ))}
+        </div>
+        <StatCrawler items={crawlItems} />
       </div>
 
       {/* ── Leader Cards ─────────────────────────────────────────────────── */}
