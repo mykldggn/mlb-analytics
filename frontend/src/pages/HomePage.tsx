@@ -232,9 +232,9 @@ function StatCrawler({ items }: { items: { label: string; val: string }[] }) {
 }
 
 export default function HomePage() {
-  const { data: hrLeaders }   = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'hr',   order: 'desc', min_pa: 50,  page_size: 1 })
+  const { data: hrLeaders }   = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'hr',   order: 'desc', min_pa: 50,  page_size: 5 })
   const { data: warHitters }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'war',  order: 'desc', min_pa: 100, page_size: 5 })
-  const { data: eraLeaders }  = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'fip', order: 'asc',  min_ip: 50,  page_size: 1 })
+  const { data: eraLeaders }  = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'fip', order: 'asc',  min_ip: 50,  page_size: 5 })
   const { data: avgLeaders }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'avg',  order: 'desc', min_pa: 100, page_size: 1 })
   const { data: wrcLeaders }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'wrc_plus', order: 'desc', min_pa: 100, page_size: 1 })
   const { data: rbiLeaders }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'rbi',  order: 'desc', min_pa: 50,  page_size: 1 })
