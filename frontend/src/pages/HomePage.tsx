@@ -175,7 +175,13 @@ function IconPlayerProfiles() {
   return (
     <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
       {/* head */}
-      <circle cx="20" cy="13" r="6" stroke={N} strokeWidth="2" />
+      <circle cx="20" cy="13" r="5.5" stroke={N} strokeWidth="2" />
+      {/* baseball cap dome over upper half of head */}
+      <path d="M14 12 Q20 3 26 12" stroke={N} strokeWidth="1.8" fill={N} fillOpacity="0.09" />
+      {/* cap brim */}
+      <line x1="13" y1="12" x2="28" y2="12" stroke={N} strokeWidth="1.8" />
+      {/* bill extending right */}
+      <path d="M27 12 L32 12 Q33.5 12 33 14.5" stroke={N} strokeWidth="1.8" />
       {/* body */}
       <path d="M8 36c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke={N} strokeWidth="2" />
       {/* red accent underline */}
