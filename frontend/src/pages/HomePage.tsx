@@ -222,36 +222,39 @@ function IconPlatoonSplits() {
 function IconStatcast() {
   return (
     <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
-      {/* gauge arc */}
-      <path d="M6 28 A14 14 0 0 1 34 28" stroke={N} strokeWidth="2" />
-      {/* ticks */}
-      <line x1="6"  y1="28" x2="9"  y2="28" stroke={N} strokeWidth="1.5" />
-      <line x1="34" y1="28" x2="31" y2="28" stroke={N} strokeWidth="1.5" />
-      <line x1="20" y1="14" x2="20" y2="17" stroke={N} strokeWidth="1.5" />
-      <line x1="11" y1="17" x2="13" y2="19" stroke={N} strokeWidth="1.5" />
-      <line x1="29" y1="17" x2="27" y2="19" stroke={N} strokeWidth="1.5" />
-      {/* needle — red */}
-      <line x1="20" y1="28" x2="28" y2="18" stroke={R} strokeWidth="2.2" />
-      <circle cx="20" cy="28" r="2.5" fill={R} />
-      {/* readout */}
-      <text x="20" y="37" textAnchor="middle" fontSize="6" fontFamily="'DM Mono',monospace" fill={N} letterSpacing="0.3">EV · xBA · Barrel</text>
+      {/* gauge arc — larger, centered lower */}
+      <path d="M4 30 A16 16 0 0 1 36 30" stroke={N} strokeWidth="2.2" />
+      {/* end ticks */}
+      <line x1="4"  y1="30" x2="7.5"  y2="30" stroke={N} strokeWidth="1.8" />
+      <line x1="36" y1="30" x2="32.5" y2="30" stroke={N} strokeWidth="1.8" />
+      {/* top & diagonal ticks */}
+      <line x1="20" y1="14" x2="20"   y2="17.5" stroke={N} strokeWidth="1.8" />
+      <line x1="9.5"  y1="18.5" x2="11.8" y2="21"   stroke={N} strokeWidth="1.5" />
+      <line x1="30.5" y1="18.5" x2="28.2" y2="21"   stroke={N} strokeWidth="1.5" />
+      {/* needle — red, pointing ~70% (toward high end) */}
+      <line x1="20" y1="30" x2="30" y2="17" stroke={R} strokeWidth="2.5" strokeLinecap="round" />
+      {/* pivot */}
+      <circle cx="20" cy="30" r="3"   fill={R} />
+      <circle cx="20" cy="30" r="1.2" fill="white" stroke="none" />
     </svg>
   )
 }
 function IconSprayChart() {
   return (
     <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
-      {/* field outline */}
-      <path d="M7 35 Q20 8 33 35" stroke={N} strokeWidth="2" />
-      <line x1="7" y1="35" x2="33" y2="35" stroke={N} strokeWidth="2" />
-      {/* spray dots — HR red, doubles navy, singles lighter */}
-      <circle cx="15" cy="24" r="2"   fill={N}       />
-      <circle cx="20" cy="15" r="2.5" fill={R}       />
-      <circle cx="26" cy="20" r="2"   fill={N}       />
-      <circle cx="11" cy="29" r="1.6" fill="#4a6fa5" />
-      <circle cx="30" cy="26" r="1.6" fill="#4a6fa5" />
-      <circle cx="18" cy="20" r="1.4" fill="#4a6fa5" />
-      {/* home plate */}
+      {/* foul lines from home plate upward */}
+      <line x1="20" y1="35" x2="4"  y2="13" stroke={N} strokeWidth="1.8" />
+      <line x1="20" y1="35" x2="36" y2="13" stroke={N} strokeWidth="1.8" />
+      {/* outfield wall arc */}
+      <path d="M4 13 Q20 4 36 13" stroke={N} strokeWidth="1.8" />
+      {/* spray dots — HR (red/large), XBH (navy), singles (blue-grey) */}
+      <circle cx="14" cy="20" r="2"   fill={N}       />
+      <circle cx="20" cy="10" r="2.5" fill={R}       />
+      <circle cx="27" cy="17" r="2"   fill={N}       />
+      <circle cx="10" cy="27" r="1.6" fill="#4a6fa5" />
+      <circle cx="31" cy="24" r="1.6" fill="#4a6fa5" />
+      <circle cx="18" cy="16" r="1.4" fill="#4a6fa5" />
+      {/* home plate — red */}
       <polygon points="20,36.5 17.5,34.5 17.5,33 22.5,33 22.5,34.5" fill={R} />
     </svg>
   )
@@ -280,17 +283,17 @@ function IconTeamAnalytics() {
   return (
     <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
       {/* axes */}
-      <line x1="5" y1="34" x2="5"  y2="7"  stroke={N} strokeWidth="1.8" />
-      <line x1="5" y1="34" x2="36" y2="34" stroke={N} strokeWidth="1.8" />
-      {/* bars */}
-      <rect x="9"  y="22" width="5" height="12" rx="1" fill={N} opacity="0.35" />
-      <rect x="17" y="16" width="5" height="18" rx="1" fill={N} opacity="0.5"  />
-      <rect x="25" y="12" width="5" height="22" rx="1" fill={N} opacity="0.7"  />
-      {/* trend line — red */}
-      <polyline points="11.5,22 19.5,16 27.5,11" stroke={R} strokeWidth="2.2" />
-      <circle cx="11.5" cy="22" r="2" fill={R} />
-      <circle cx="19.5" cy="16" r="2" fill={R} />
-      <circle cx="27.5" cy="11" r="2" fill={R} />
+      <line x1="6" y1="33" x2="6"  y2="8"  stroke={N} strokeWidth="1.8" />
+      <line x1="6" y1="33" x2="37" y2="33" stroke={N} strokeWidth="1.8" />
+      {/* bars — solid, stepped heights */}
+      <rect x="10" y="23" width="6" height="10" rx="1" fill={N} opacity="0.4" />
+      <rect x="19" y="17" width="6" height="16" rx="1" fill={N} opacity="0.65" />
+      <rect x="28" y="11" width="6" height="22" rx="1" fill={N} opacity="0.9" />
+      {/* trend line — red, through bar tops */}
+      <polyline points="13,23 22,17 31,11" stroke={R} strokeWidth="2.4" strokeLinejoin="round" />
+      <circle cx="13" cy="23" r="2.2" fill={R} stroke="none" />
+      <circle cx="22" cy="17" r="2.2" fill={R} stroke="none" />
+      <circle cx="31" cy="11" r="2.2" fill={R} stroke="none" />
     </svg>
   )
 }
