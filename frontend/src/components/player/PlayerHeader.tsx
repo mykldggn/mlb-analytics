@@ -64,8 +64,8 @@ export default function PlayerHeader({ player }: Props) {
               src={`https://midfield.mlbstatic.com/v1/team/${teamId}/spots/88`}
               alt={teamAbbr}
               title={teamAbbr}
-              width={56}
-              height={56}
+              width={80}
+              height={80}
               style={{ objectFit: 'contain', display: 'block' }}
               onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
             />
