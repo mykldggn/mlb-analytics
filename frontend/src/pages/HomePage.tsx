@@ -299,12 +299,11 @@ function IconContractValue() {
     <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
       {/* outer ring */}
       <circle cx="20" cy="20" r="15" stroke={N} strokeWidth="2" />
-      {/* dollar sign */}
-      <line x1="20" y1="9" x2="20" y2="31" stroke={N} strokeWidth="1.8" />
-      <path d="M25 12.5c0 0-10-.5-10 5s10 5 10 10-10 5-10 5" stroke={N} strokeWidth="2" />
+      {/* dollar sign as text glyph — crisp and properly sized */}
+      <text x="20" y="27" textAnchor="middle" fontSize="22" fontFamily="'Barlow Condensed',Georgia,serif" fontWeight="700" fill={N} stroke="none">$</text>
       {/* WAR badge — red */}
       <circle cx="31" cy="11" r="6" fill={R} />
-      <text x="31" y="14" textAnchor="middle" fontSize="6.5" fontFamily="'Barlow Condensed',sans-serif" fontWeight="700" fill="white">WAR</text>
+      <text x="31" y="14.5" textAnchor="middle" fontSize="6.5" fontFamily="'Barlow Condensed',sans-serif" fontWeight="700" fill="white" stroke="none">WAR</text>
     </svg>
   )
 }
