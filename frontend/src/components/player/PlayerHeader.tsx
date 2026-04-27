@@ -1,38 +1,5 @@
 import { MLB_TEAM_COLORS } from '../../utils/constants'
 
-const TEAM_IDS: Record<string, number> = {
-  ARI: 109, AZ: 109,
-  ATL: 144,
-  BAL: 110,
-  BOS: 111,
-  CHC: 112,
-  CWS: 145, CHW: 145,
-  CIN: 113,
-  CLE: 114,
-  COL: 115,
-  DET: 116,
-  HOU: 117,
-  KCR: 118, KC: 118,
-  LAA: 108,
-  LAD: 119,
-  MIA: 146,
-  MIL: 158,
-  MIN: 142,
-  NYM: 121,
-  NYY: 147,
-  OAK: 133, ATH: 133,
-  PHI: 143,
-  PIT: 134,
-  SDP: 135, SD: 135,
-  SFG: 137, SF: 137,
-  SEA: 136,
-  STL: 138,
-  TBR: 139, TB: 139,
-  TEX: 140,
-  TOR: 141,
-  WSN: 120, WAS: 120, WSH: 120,
-}
-
 interface Props {
   player: Record<string, unknown>
 }
@@ -40,7 +7,7 @@ interface Props {
 export default function PlayerHeader({ player }: Props) {
   const teamAbbr = String(player.currentTeam ?? '')
   const colors = MLB_TEAM_COLORS[teamAbbr] ?? { primary: '#1e3a5f', secondary: '#374151' }
-  const teamId = TEAM_IDS[teamAbbr?.toUpperCase()]
+  const teamId = player.currentTeamId ? Number(player.currentTeamId) : null
 
   return (
     <div className="card overflow-hidden" style={{ position: 'relative' }}>
