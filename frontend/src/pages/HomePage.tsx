@@ -166,16 +166,157 @@ function LeaderCard({ title, statKey, data }: {
   )
 }
 
+/* ─── Feature Card Icons (SVG) ──────────────────────────────────────────── */
+function IconPlayerProfiles() {
+  return (
+    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="16" cy="11" r="5.5" />
+      <path d="M5 28c0-6.075 4.925-11 11-11s11 4.925 11 11" />
+      {/* stat lines on a card */}
+      <line x1="10" y1="8" x2="22" y2="8" strokeDasharray="0" opacity="0" />
+    </svg>
+  )
+}
+function IconParkFavorability() {
+  return (
+    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {/* outfield arc */}
+      <path d="M5 26 Q16 4 27 26" />
+      {/* foul lines */}
+      <line x1="16" y1="26" x2="5" y2="26" />
+      <line x1="16" y1="26" x2="27" y2="26" />
+      {/* bases */}
+      <rect x="14" y="12" width="4" height="4" rx="0.5" transform="rotate(45 16 14)" fill="currentColor" stroke="none" />
+      <rect x="9"  y="19" width="3" height="3" rx="0.5" transform="rotate(45 10.5 20.5)" fill="currentColor" stroke="none" />
+      <rect x="20" y="19" width="3" height="3" rx="0.5" transform="rotate(45 21.5 20.5)" fill="currentColor" stroke="none" />
+      {/* home plate */}
+      <polygon points="16,27 13.5,25 13.5,23 18.5,23 18.5,25" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+function IconPlatoonSplits() {
+  return (
+    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {/* L batter silhouette */}
+      <circle cx="9" cy="8" r="3" />
+      <path d="M6 12 L6 19 L9 19" />
+      <line x1="6" y1="15" x2="3" y2="18" />
+      {/* R batter silhouette (mirrored) */}
+      <circle cx="23" cy="8" r="3" />
+      <path d="M26 12 L26 19 L23 19" />
+      <line x1="26" y1="15" x2="29" y2="18" />
+      {/* divider */}
+      <line x1="16" y1="4" x2="16" y2="24" strokeDasharray="3 2.5" strokeWidth="1.4" opacity="0.6" />
+      {/* vs label area */}
+      <text x="16" y="29" textAnchor="middle" fontSize="7" fontFamily="sans-serif" fill="currentColor" stroke="none" fontWeight="700">VS</text>
+    </svg>
+  )
+}
+function IconStatcast() {
+  return (
+    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {/* Speedometer arc */}
+      <path d="M5 22 A11 11 0 0 1 27 22" />
+      {/* tick marks */}
+      <line x1="5"  y1="22" x2="7"  y2="22" />
+      <line x1="27" y1="22" x2="25" y2="22" />
+      <line x1="16" y1="11" x2="16" y2="13" />
+      <line x1="9"  y1="14" x2="10.4" y2="15.4" />
+      <line x1="23" y1="14" x2="21.6" y2="15.4" />
+      {/* needle */}
+      <line x1="16" y1="22" x2="22" y2="14" strokeWidth="2" />
+      <circle cx="16" cy="22" r="2" fill="currentColor" stroke="none" />
+      {/* exit velo label */}
+      <text x="16" y="28" textAnchor="middle" fontSize="5.5" fontFamily="sans-serif" fill="currentColor" stroke="none" letterSpacing="0.5">EV · LA · xBA</text>
+    </svg>
+  )
+}
+function IconSprayChart() {
+  return (
+    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {/* outfield arc */}
+      <path d="M6 28 Q16 6 26 28" />
+      <line x1="6" y1="28" x2="26" y2="28" />
+      {/* spray dots - singles/doubles/HR */}
+      <circle cx="12" cy="20" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="16" cy="13" r="2"   fill="currentColor" stroke="none" />
+      <circle cx="21" cy="17" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="9"  cy="23" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="24" cy="21" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="14" cy="18" r="1.2" fill="currentColor" stroke="none" />
+      {/* home plate */}
+      <polygon points="16,29.5 14,28 14,27 18,27 18,28" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+function IconPlayerComparison() {
+  return (
+    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {/* two player heads */}
+      <circle cx="10" cy="8" r="3.5" />
+      <circle cx="22" cy="8" r="3.5" />
+      {/* vs bars */}
+      <rect x="6"  y="16" width="8" height="3" rx="1" fill="currentColor" stroke="none" />
+      <rect x="6"  y="21" width="5" height="3" rx="1" fill="currentColor" stroke="none" />
+      <rect x="18" y="16" width="8" height="3" rx="1" strokeWidth="1.4" />
+      <rect x="21" y="21" width="5" height="3" rx="1" strokeWidth="1.4" />
+    </svg>
+  )
+}
+function IconTeamAnalytics() {
+  return (
+    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {/* axes */}
+      <line x1="5" y1="26" x2="5"  y2="6"  />
+      <line x1="5" y1="26" x2="28" y2="26" />
+      {/* win/loss line */}
+      <polyline points="5,22 10,18 15,20 20,13 25,10" strokeWidth="2" />
+      {/* dots */}
+      <circle cx="10" cy="18" r="1.8" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="20" r="1.8" fill="currentColor" stroke="none" />
+      <circle cx="20" cy="13" r="1.8" fill="currentColor" stroke="none" />
+      <circle cx="25" cy="10" r="1.8" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+function IconContractValue() {
+  return (
+    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {/* dollar circle */}
+      <circle cx="16" cy="16" r="12" />
+      <line x1="16" y1="7" x2="16" y2="25" />
+      <path d="M20 10.5 C20 10.5 12 10 12 14 C12 18 20 18 20 22 C20 26 12 25.5 12 25.5" />
+    </svg>
+  )
+}
+function IconPitchZone() {
+  return (
+    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {/* strike zone outer box */}
+      <rect x="7" y="6" width="18" height="20" rx="1" />
+      {/* 3x3 grid lines */}
+      <line x1="13" y1="6"  x2="13" y2="26" strokeWidth="1.2" />
+      <line x1="19" y1="6"  x2="19" y2="26" strokeWidth="1.2" />
+      <line x1="7"  y1="12.7" x2="25" y2="12.7" strokeWidth="1.2" />
+      <line x1="7"  y1="19.3" x2="25" y2="19.3" strokeWidth="1.2" />
+      {/* hot zone dot */}
+      <circle cx="10" cy="10" r="2.5" fill="currentColor" stroke="none" opacity="0.9" />
+      {/* home plate */}
+      <path d="M12 29 L16 31 L20 29 L20 27 L12 27 Z" strokeWidth="1.2" />
+    </svg>
+  )
+}
+
 const FEATURES = [
-  { emoji: '👤', title: 'Player Profiles',          desc: 'Headshots, full stat breakdowns, Statcast metrics, career stats & multi-year trends.' },
-  { emoji: '🏟️', title: 'Park Favorability Index',  desc: 'Our custom PFI stat quantifies ballpark effects on batters and pitchers (0–200 scale).' },
-  { emoji: '↔️', title: 'Platoon Splits',            desc: 'How every player performs vs LHP and RHP — available on each player profile page.' },
-  { emoji: '📡', title: 'Statcast Data',             desc: 'xBA, xSLG, xwOBA, Barrel%, Hard Hit%, Exit Velocity, Launch Angle, Sprint Speed.' },
-  { emoji: '🗺️', title: 'Spray Charts',             desc: 'Visualize where every batted ball landed, colored by hit type.' },
-  { emoji: '⚖️', title: 'Player Comparison',         desc: 'Side-by-side stat comparison with radar charts for up to 4 players.' },
-  { emoji: '📊', title: 'Team Analytics',            desc: 'Batting WAR, pitching WAR, wRC+, and win/loss scatter plots across seasons.' },
-  { emoji: '💰', title: 'Contract Value',            desc: 'Who earned their deal? WAR per salary dollar using Lahman salary data.' },
-  { emoji: '🎯', title: 'Pitch Zone Charts',         desc: 'Pitcher location heatmaps by pitch type and batter handedness (Statcast).' },
+  { icon: <IconPlayerProfiles />,    title: 'Player Profiles',         desc: 'Headshots, full stat breakdowns, Statcast metrics, career stats & multi-year trends.',        to: '/leaderboards' },
+  { icon: <IconParkFavorability />,  title: 'Park Favorability Index', desc: 'Our custom PFI stat quantifies ballpark effects on batters and pitchers (0–200 scale).',     to: '/park-factors' },
+  { icon: <IconPlatoonSplits />,     title: 'Platoon Splits',          desc: 'How every player performs vs LHP and RHP — available on each player profile page.',          to: '/leaderboards' },
+  { icon: <IconStatcast />,          title: 'Statcast Data',           desc: 'xBA, xSLG, xwOBA, Barrel%, Hard Hit%, Exit Velocity, Launch Angle, Sprint Speed.',          to: '/leaderboards' },
+  { icon: <IconSprayChart />,        title: 'Spray Charts',            desc: 'Visualize where every batted ball landed, colored by hit type.',                             to: '/leaderboards' },
+  { icon: <IconPlayerComparison />,  title: 'Player Comparison',       desc: 'Side-by-side stat comparison with radar charts for up to 4 players.',                       to: '/compare' },
+  { icon: <IconTeamAnalytics />,     title: 'Team Analytics',          desc: 'Batting WAR, pitching WAR, wRC+, and win/loss scatter plots across seasons.',               to: '/team-analytics' },
+  { icon: <IconContractValue />,     title: 'Contract Value',          desc: 'Who earned their deal? WAR per salary dollar using Lahman salary data.',                    to: '/contract-value' },
+  { icon: <IconPitchZone />,         title: 'Pitch Zone Charts',       desc: 'Pitcher location heatmaps by pitch type and batter handedness (Statcast).',                 to: '/pitch-zones' },
 ]
 
 // ~200px per item at this font size; speed = 80px/s
@@ -392,31 +533,39 @@ export default function HomePage() {
         <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 700, color: 'var(--text)', marginBottom: 16 }}>
           Features
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
           {FEATURES.map(f => (
-            <div
+            <Link
               key={f.title}
-              style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 10,
-                padding: '16px 18px',
-                transition: 'border-color 0.15s, transform 0.15s',
-                cursor: 'default',
-              }}
-              onMouseEnter={e => {
-                ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--accent)'
-                ;(e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'
-              }}
-              onMouseLeave={e => {
-                ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)'
-                ;(e.currentTarget as HTMLDivElement).style.transform = 'none'
-              }}
+              to={f.to}
+              style={{ textDecoration: 'none' }}
             >
-              <div style={{ fontSize: 28, marginBottom: 8 }}>{f.emoji}</div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{f.title}</div>
-              <div style={{ fontSize: 12.5, color: 'var(--text2)', lineHeight: 1.65 }}>{f.desc}</div>
-            </div>
+              <div
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 10,
+                  padding: '22px 22px 20px',
+                  height: '100%',
+                  transition: 'border-color 0.15s, transform 0.15s, box-shadow 0.15s',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={e => {
+                  ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--accent2)'
+                  ;(e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'
+                  ;(e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 14px rgba(0,25,80,0.10)'
+                }}
+                onMouseLeave={e => {
+                  ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)'
+                  ;(e.currentTarget as HTMLDivElement).style.transform = 'none'
+                  ;(e.currentTarget as HTMLDivElement).style.boxShadow = 'none'
+                }}
+              >
+                <div style={{ color: 'var(--accent2)', marginBottom: 12 }}>{f.icon}</div>
+                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 5, letterSpacing: '0.01em' }}>{f.title}</div>
+                <div style={{ fontSize: 12.5, color: 'var(--text2)', lineHeight: 1.65 }}>{f.desc}</div>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
