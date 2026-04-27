@@ -166,157 +166,178 @@ function LeaderCard({ title, statKey, data }: {
   )
 }
 
-/* ─── Feature Card Icons (SVG) ──────────────────────────────────────────── */
+/* ─── Feature Card Icons — two-tone navy + red ──────────────────────────── */
+const N = '#001f5b'   // navy
+const R = '#b8001a'   // red
+const SZ = 40
+
 function IconPlayerProfiles() {
   return (
-    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="16" cy="11" r="5.5" />
-      <path d="M5 28c0-6.075 4.925-11 11-11s11 4.925 11 11" />
-      {/* stat lines on a card */}
-      <line x1="10" y1="8" x2="22" y2="8" strokeDasharray="0" opacity="0" />
+    <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {/* head */}
+      <circle cx="20" cy="13" r="6" stroke={N} strokeWidth="2" />
+      {/* body */}
+      <path d="M8 36c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke={N} strokeWidth="2" />
+      {/* red accent underline */}
+      <line x1="8" y1="38" x2="32" y2="38" stroke={R} strokeWidth="2.5" />
     </svg>
   )
 }
 function IconParkFavorability() {
   return (
-    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
       {/* outfield arc */}
-      <path d="M5 26 Q16 4 27 26" />
+      <path d="M5 33 Q20 5 35 33" stroke={N} strokeWidth="2" />
       {/* foul lines */}
-      <line x1="16" y1="26" x2="5" y2="26" />
-      <line x1="16" y1="26" x2="27" y2="26" />
-      {/* bases */}
-      <rect x="14" y="12" width="4" height="4" rx="0.5" transform="rotate(45 16 14)" fill="currentColor" stroke="none" />
-      <rect x="9"  y="19" width="3" height="3" rx="0.5" transform="rotate(45 10.5 20.5)" fill="currentColor" stroke="none" />
-      <rect x="20" y="19" width="3" height="3" rx="0.5" transform="rotate(45 21.5 20.5)" fill="currentColor" stroke="none" />
-      {/* home plate */}
-      <polygon points="16,27 13.5,25 13.5,23 18.5,23 18.5,25" fill="currentColor" stroke="none" />
+      <line x1="20" y1="33" x2="5"  y2="33" stroke={N} strokeWidth="2" />
+      <line x1="20" y1="33" x2="35" y2="33" stroke={N} strokeWidth="2" />
+      {/* bases — diamond rotated */}
+      <rect x="17.5" y="14.5" width="5" height="5" rx="0.5" transform="rotate(45 20 17)" fill={N} />
+      <rect x="12"   y="22"   width="4" height="4" rx="0.5" transform="rotate(45 14 24)" fill={N} />
+      <rect x="24"   y="22"   width="4" height="4" rx="0.5" transform="rotate(45 26 24)" fill={N} />
+      {/* home plate — red */}
+      <polygon points="20,34.5 17,32 17,30 23,30 23,32" fill={R} />
     </svg>
   )
 }
 function IconPlatoonSplits() {
   return (
-    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* L batter silhouette */}
-      <circle cx="9" cy="8" r="3" />
-      <path d="M6 12 L6 19 L9 19" />
-      <line x1="6" y1="15" x2="3" y2="18" />
-      {/* R batter silhouette (mirrored) */}
-      <circle cx="23" cy="8" r="3" />
-      <path d="M26 12 L26 19 L23 19" />
-      <line x1="26" y1="15" x2="29" y2="18" />
-      {/* divider */}
-      <line x1="16" y1="4" x2="16" y2="24" strokeDasharray="3 2.5" strokeWidth="1.4" opacity="0.6" />
-      {/* vs label area */}
-      <text x="16" y="29" textAnchor="middle" fontSize="7" fontFamily="sans-serif" fill="currentColor" stroke="none" fontWeight="700">VS</text>
+    <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {/* left batter — navy */}
+      <circle cx="11" cy="9" r="4" stroke={N} strokeWidth="1.8" />
+      <path d="M7 14 L7 24 L11 24" stroke={N} strokeWidth="1.8" />
+      <line x1="7" y1="19" x2="3" y2="23" stroke={N} strokeWidth="1.8" />
+      {/* right batter — red */}
+      <circle cx="29" cy="9" r="4" stroke={R} strokeWidth="1.8" />
+      <path d="M33 14 L33 24 L29 24" stroke={R} strokeWidth="1.8" />
+      <line x1="33" y1="19" x2="37" y2="23" stroke={R} strokeWidth="1.8" />
+      {/* centre divider */}
+      <line x1="20" y1="5" x2="20" y2="30" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="3 2.5" />
+      {/* L / R labels */}
+      <text x="11" y="32" textAnchor="middle" fontSize="8" fontFamily="'Barlow Condensed',sans-serif" fontWeight="700" fill={N}>L</text>
+      <text x="29" y="32" textAnchor="middle" fontSize="8" fontFamily="'Barlow Condensed',sans-serif" fontWeight="700" fill={R}>R</text>
     </svg>
   )
 }
 function IconStatcast() {
   return (
-    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* Speedometer arc */}
-      <path d="M5 22 A11 11 0 0 1 27 22" />
-      {/* tick marks */}
-      <line x1="5"  y1="22" x2="7"  y2="22" />
-      <line x1="27" y1="22" x2="25" y2="22" />
-      <line x1="16" y1="11" x2="16" y2="13" />
-      <line x1="9"  y1="14" x2="10.4" y2="15.4" />
-      <line x1="23" y1="14" x2="21.6" y2="15.4" />
-      {/* needle */}
-      <line x1="16" y1="22" x2="22" y2="14" strokeWidth="2" />
-      <circle cx="16" cy="22" r="2" fill="currentColor" stroke="none" />
-      {/* exit velo label */}
-      <text x="16" y="28" textAnchor="middle" fontSize="5.5" fontFamily="sans-serif" fill="currentColor" stroke="none" letterSpacing="0.5">EV · LA · xBA</text>
+    <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {/* gauge arc */}
+      <path d="M6 28 A14 14 0 0 1 34 28" stroke={N} strokeWidth="2" />
+      {/* ticks */}
+      <line x1="6"  y1="28" x2="9"  y2="28" stroke={N} strokeWidth="1.5" />
+      <line x1="34" y1="28" x2="31" y2="28" stroke={N} strokeWidth="1.5" />
+      <line x1="20" y1="14" x2="20" y2="17" stroke={N} strokeWidth="1.5" />
+      <line x1="11" y1="17" x2="13" y2="19" stroke={N} strokeWidth="1.5" />
+      <line x1="29" y1="17" x2="27" y2="19" stroke={N} strokeWidth="1.5" />
+      {/* needle — red */}
+      <line x1="20" y1="28" x2="28" y2="18" stroke={R} strokeWidth="2.2" />
+      <circle cx="20" cy="28" r="2.5" fill={R} />
+      {/* readout */}
+      <text x="20" y="37" textAnchor="middle" fontSize="6" fontFamily="'DM Mono',monospace" fill={N} letterSpacing="0.3">EV · xBA · Barrel</text>
     </svg>
   )
 }
 function IconSprayChart() {
   return (
-    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* outfield arc */}
-      <path d="M6 28 Q16 6 26 28" />
-      <line x1="6" y1="28" x2="26" y2="28" />
-      {/* spray dots - singles/doubles/HR */}
-      <circle cx="12" cy="20" r="1.5" fill="currentColor" stroke="none" />
-      <circle cx="16" cy="13" r="2"   fill="currentColor" stroke="none" />
-      <circle cx="21" cy="17" r="1.5" fill="currentColor" stroke="none" />
-      <circle cx="9"  cy="23" r="1.2" fill="currentColor" stroke="none" />
-      <circle cx="24" cy="21" r="1.2" fill="currentColor" stroke="none" />
-      <circle cx="14" cy="18" r="1.2" fill="currentColor" stroke="none" />
+    <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {/* field outline */}
+      <path d="M7 35 Q20 8 33 35" stroke={N} strokeWidth="2" />
+      <line x1="7" y1="35" x2="33" y2="35" stroke={N} strokeWidth="2" />
+      {/* spray dots — HR red, doubles navy, singles lighter */}
+      <circle cx="15" cy="24" r="2"   fill={N}       />
+      <circle cx="20" cy="15" r="2.5" fill={R}       />
+      <circle cx="26" cy="20" r="2"   fill={N}       />
+      <circle cx="11" cy="29" r="1.6" fill="#4a6fa5" />
+      <circle cx="30" cy="26" r="1.6" fill="#4a6fa5" />
+      <circle cx="18" cy="20" r="1.4" fill="#4a6fa5" />
       {/* home plate */}
-      <polygon points="16,29.5 14,28 14,27 18,27 18,28" fill="currentColor" stroke="none" />
+      <polygon points="20,36.5 17.5,34.5 17.5,33 22.5,33 22.5,34.5" fill={R} />
     </svg>
   )
 }
 function IconPlayerComparison() {
   return (
-    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* two player heads */}
-      <circle cx="10" cy="8" r="3.5" />
-      <circle cx="22" cy="8" r="3.5" />
-      {/* vs bars */}
-      <rect x="6"  y="16" width="8" height="3" rx="1" fill="currentColor" stroke="none" />
-      <rect x="6"  y="21" width="5" height="3" rx="1" fill="currentColor" stroke="none" />
-      <rect x="18" y="16" width="8" height="3" rx="1" strokeWidth="1.4" />
-      <rect x="21" y="21" width="5" height="3" rx="1" strokeWidth="1.4" />
+    <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {/* player A */}
+      <circle cx="12" cy="9"  r="4.5" stroke={N} strokeWidth="2" />
+      <path   d="M4 26c0-4.418 3.582-8 8-8" stroke={N} strokeWidth="2" />
+      {/* player B */}
+      <circle cx="28" cy="9"  r="4.5" stroke={R} strokeWidth="2" />
+      <path   d="M36 26c0-4.418-3.582-8-8-8" stroke={R} strokeWidth="2" />
+      {/* VS badge */}
+      <rect x="14" y="15" width="12" height="10" rx="2" fill={N} />
+      <text x="20" y="23" textAnchor="middle" fontSize="7.5" fontFamily="'Barlow Condensed',sans-serif" fontWeight="700" fill="white">VS</text>
+      {/* stat bars */}
+      <rect x="4"  y="30" width="13" height="3" rx="1" fill={N} />
+      <rect x="4"  y="35" width="9"  height="3" rx="1" fill={N} opacity="0.5" />
+      <rect x="23" y="30" width="13" height="3" rx="1" fill={R} />
+      <rect x="27" y="35" width="9"  height="3" rx="1" fill={R} opacity="0.5" />
     </svg>
   )
 }
 function IconTeamAnalytics() {
   return (
-    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
       {/* axes */}
-      <line x1="5" y1="26" x2="5"  y2="6"  />
-      <line x1="5" y1="26" x2="28" y2="26" />
-      {/* win/loss line */}
-      <polyline points="5,22 10,18 15,20 20,13 25,10" strokeWidth="2" />
-      {/* dots */}
-      <circle cx="10" cy="18" r="1.8" fill="currentColor" stroke="none" />
-      <circle cx="15" cy="20" r="1.8" fill="currentColor" stroke="none" />
-      <circle cx="20" cy="13" r="1.8" fill="currentColor" stroke="none" />
-      <circle cx="25" cy="10" r="1.8" fill="currentColor" stroke="none" />
+      <line x1="5" y1="34" x2="5"  y2="7"  stroke={N} strokeWidth="1.8" />
+      <line x1="5" y1="34" x2="36" y2="34" stroke={N} strokeWidth="1.8" />
+      {/* bars */}
+      <rect x="9"  y="22" width="5" height="12" rx="1" fill={N} opacity="0.35" />
+      <rect x="17" y="16" width="5" height="18" rx="1" fill={N} opacity="0.5"  />
+      <rect x="25" y="12" width="5" height="22" rx="1" fill={N} opacity="0.7"  />
+      {/* trend line — red */}
+      <polyline points="11.5,22 19.5,16 27.5,11" stroke={R} strokeWidth="2.2" />
+      <circle cx="11.5" cy="22" r="2" fill={R} />
+      <circle cx="19.5" cy="16" r="2" fill={R} />
+      <circle cx="27.5" cy="11" r="2" fill={R} />
     </svg>
   )
 }
 function IconContractValue() {
   return (
-    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* dollar circle */}
-      <circle cx="16" cy="16" r="12" />
-      <line x1="16" y1="7" x2="16" y2="25" />
-      <path d="M20 10.5 C20 10.5 12 10 12 14 C12 18 20 18 20 22 C20 26 12 25.5 12 25.5" />
+    <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {/* outer ring */}
+      <circle cx="20" cy="20" r="15" stroke={N} strokeWidth="2" />
+      {/* dollar sign */}
+      <line x1="20" y1="9" x2="20" y2="31" stroke={N} strokeWidth="1.8" />
+      <path d="M25 12.5c0 0-10-.5-10 5s10 5 10 10-10 5-10 5" stroke={N} strokeWidth="2" />
+      {/* WAR badge — red */}
+      <circle cx="31" cy="11" r="6" fill={R} />
+      <text x="31" y="14" textAnchor="middle" fontSize="6.5" fontFamily="'Barlow Condensed',sans-serif" fontWeight="700" fill="white">WAR</text>
     </svg>
   )
 }
 function IconPitchZone() {
   return (
-    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* strike zone outer box */}
-      <rect x="7" y="6" width="18" height="20" rx="1" />
-      {/* 3x3 grid lines */}
-      <line x1="13" y1="6"  x2="13" y2="26" strokeWidth="1.2" />
-      <line x1="19" y1="6"  x2="19" y2="26" strokeWidth="1.2" />
-      <line x1="7"  y1="12.7" x2="25" y2="12.7" strokeWidth="1.2" />
-      <line x1="7"  y1="19.3" x2="25" y2="19.3" strokeWidth="1.2" />
-      {/* hot zone dot */}
-      <circle cx="10" cy="10" r="2.5" fill="currentColor" stroke="none" opacity="0.9" />
+    <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {/* strike zone */}
+      <rect x="8" y="6" width="24" height="26" rx="1.5" stroke={N} strokeWidth="2" />
+      {/* grid */}
+      <line x1="16" y1="6"    x2="16" y2="32"    stroke={N} strokeWidth="1.2" opacity="0.6" />
+      <line x1="24" y1="6"    x2="24" y2="32"    stroke={N} strokeWidth="1.2" opacity="0.6" />
+      <line x1="8"  y1="14.7" x2="32" y2="14.7"  stroke={N} strokeWidth="1.2" opacity="0.6" />
+      <line x1="8"  y1="23.3" x2="32" y2="23.3"  stroke={N} strokeWidth="1.2" opacity="0.6" />
+      {/* heat zones — center hot (red), mid (orange-ish), outer (cool) */}
+      <rect x="16" y="14.7" width="8" height="8.6" rx="0.5" fill={R}       opacity="0.85" />
+      <rect x="8"  y="14.7" width="8" height="8.6" rx="0.5" fill="#d97706" opacity="0.5"  />
+      <rect x="24" y="6"    width="8" height="8.7" rx="0.5" fill={N}       opacity="0.25" />
       {/* home plate */}
-      <path d="M12 29 L16 31 L20 29 L20 27 L12 27 Z" strokeWidth="1.2" />
+      <path d="M14 36 L20 39 L26 36 L26 33 L14 33 Z" stroke={N} strokeWidth="1.5" />
     </svg>
   )
 }
 
 const FEATURES = [
-  { icon: <IconPlayerProfiles />,    title: 'Player Profiles',         desc: 'Headshots, full stat breakdowns, Statcast metrics, career stats & multi-year trends.',        to: '/leaderboards' },
-  { icon: <IconParkFavorability />,  title: 'Park Favorability Index', desc: 'Our custom PFI stat quantifies ballpark effects on batters and pitchers (0–200 scale).',     to: '/park-factors' },
-  { icon: <IconPlatoonSplits />,     title: 'Platoon Splits',          desc: 'How every player performs vs LHP and RHP — available on each player profile page.',          to: '/leaderboards' },
-  { icon: <IconStatcast />,          title: 'Statcast Data',           desc: 'xBA, xSLG, xwOBA, Barrel%, Hard Hit%, Exit Velocity, Launch Angle, Sprint Speed.',          to: '/leaderboards' },
-  { icon: <IconSprayChart />,        title: 'Spray Charts',            desc: 'Visualize where every batted ball landed, colored by hit type.',                             to: '/leaderboards' },
-  { icon: <IconPlayerComparison />,  title: 'Player Comparison',       desc: 'Side-by-side stat comparison with radar charts for up to 4 players.',                       to: '/compare' },
-  { icon: <IconTeamAnalytics />,     title: 'Team Analytics',          desc: 'Batting WAR, pitching WAR, wRC+, and win/loss scatter plots across seasons.',               to: '/team-analytics' },
-  { icon: <IconContractValue />,     title: 'Contract Value',          desc: 'Who earned their deal? WAR per salary dollar using Lahman salary data.',                    to: '/contract-value' },
-  { icon: <IconPitchZone />,         title: 'Pitch Zone Charts',       desc: 'Pitcher location heatmaps by pitch type and batter handedness (Statcast).',                 to: '/pitch-zones' },
+  { icon: <IconPlayerProfiles />,    title: 'Player Profiles',         desc: 'Full stat breakdowns, career arcs, Statcast metrics and multi-year trends.',              to: '/leaderboards' },
+  { icon: <IconParkFavorability />,  title: 'Park Favorability Index', desc: 'Custom PFI quantifies each ballpark\'s effect on batters and pitchers (0–200 scale).',    to: '/park-factors' },
+  { icon: <IconPlatoonSplits />,     title: 'Platoon Splits',          desc: 'How every player performs vs lefties and righties — on every profile.',                   to: '/leaderboards' },
+  { icon: <IconStatcast />,          title: 'Statcast Data',           desc: 'xBA, xSLG, xwOBA, Barrel%, Hard Hit%, Exit Velocity, Launch Angle, Sprint Speed.',       to: '/leaderboards' },
+  { icon: <IconSprayChart />,        title: 'Spray Charts',            desc: 'Visualize every batted ball — colored by type — on any player profile.',                  to: '/leaderboards' },
+  { icon: <IconPlayerComparison />,  title: 'Player Comparison',       desc: 'Side-by-side radar chart comparisons for up to 4 players across any era.',                to: '/compare' },
+  { icon: <IconTeamAnalytics />,     title: 'Team Analytics',          desc: 'Does batting WAR, wRC+, or FIP best predict team wins? Find out.',                        to: '/team-analytics' },
+  { icon: <IconContractValue />,     title: 'Contract Value',          desc: 'Who earned their deal and who was overpaid? WAR per $1M of salary.',                      to: '/contract-value' },
+  { icon: <IconPitchZone />,         title: 'Pitch Zone Charts',       desc: 'Pitcher location heatmaps — by pitch type and batter handedness.',                        to: '/pitch-zones' },
 ]
 
 // ~200px per item at this font size; speed = 80px/s
@@ -535,35 +556,34 @@ export default function HomePage() {
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
           {FEATURES.map(f => (
-            <Link
-              key={f.title}
-              to={f.to}
-              style={{ textDecoration: 'none' }}
-            >
+            <Link key={f.title} to={f.to} style={{ textDecoration: 'none' }}>
               <div
                 style={{
-                  background: 'var(--surface)',
+                  background: 'white',
                   border: '1px solid var(--border)',
-                  borderRadius: 10,
-                  padding: '22px 22px 20px',
+                  borderRadius: 14,
+                  padding: '24px 24px 22px',
                   height: '100%',
+                  boxShadow: '0 1px 3px rgba(0,25,80,0.06)',
                   transition: 'border-color 0.15s, transform 0.15s, box-shadow 0.15s',
                   cursor: 'pointer',
                 }}
                 onMouseEnter={e => {
-                  ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--accent2)'
-                  ;(e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'
-                  ;(e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 14px rgba(0,25,80,0.10)'
+                  const el = e.currentTarget as HTMLDivElement
+                  el.style.borderColor = 'var(--accent2)'
+                  el.style.transform = 'translateY(-2px)'
+                  el.style.boxShadow = '0 6px 20px rgba(0,25,80,0.10)'
                 }}
                 onMouseLeave={e => {
-                  ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)'
-                  ;(e.currentTarget as HTMLDivElement).style.transform = 'none'
-                  ;(e.currentTarget as HTMLDivElement).style.boxShadow = 'none'
+                  const el = e.currentTarget as HTMLDivElement
+                  el.style.borderColor = 'var(--border)'
+                  el.style.transform = 'none'
+                  el.style.boxShadow = '0 1px 3px rgba(0,25,80,0.06)'
                 }}
               >
-                <div style={{ color: 'var(--accent2)', marginBottom: 12 }}>{f.icon}</div>
-                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 5, letterSpacing: '0.01em' }}>{f.title}</div>
-                <div style={{ fontSize: 12.5, color: 'var(--text2)', lineHeight: 1.65 }}>{f.desc}</div>
+                <div style={{ marginBottom: 14 }}>{f.icon}</div>
+                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 17, fontWeight: 700, color: 'var(--text)', marginBottom: 6, letterSpacing: '0.01em' }}>{f.title}</div>
+                <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>{f.desc}</div>
               </div>
             </Link>
           ))}
