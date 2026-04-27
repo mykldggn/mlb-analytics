@@ -3,6 +3,60 @@ import { formatStat } from '../../utils/formatters'
 import { STAT_DEFINITIONS } from '../../utils/constants'
 import Tooltip from '../ui/Tooltip'
 
+// MLBAM team IDs → used for logo URLs
+const TEAM_IDS: Record<string, number> = {
+  ARI: 109, AZ: 109,
+  ATL: 144,
+  BAL: 110,
+  BOS: 111,
+  CHC: 112,
+  CWS: 145, CHW: 145,
+  CIN: 113,
+  CLE: 114,
+  COL: 115,
+  DET: 116,
+  HOU: 117,
+  KCR: 118, KC: 118,
+  LAA: 108,
+  LAD: 119,
+  MIA: 146,
+  MIL: 158,
+  MIN: 142,
+  NYM: 121,
+  NYY: 147,
+  OAK: 133, ATH: 133,
+  PHI: 143,
+  PIT: 134,
+  SDP: 135, SD: 135,
+  SFG: 137, SF: 137,
+  SEA: 136,
+  STL: 138,
+  TBR: 139, TB: 139,
+  TEX: 140,
+  TOR: 141,
+  WSN: 120, WAS: 120, WSH: 120,
+}
+
+function TeamLogo({ abbrev }: { abbrev: string }) {
+  const id = TEAM_IDS[abbrev?.toUpperCase()]
+  if (!id) return <span style={{ fontSize: 11, color: 'var(--text3)' }}>{abbrev}</span>
+  return (
+    <img
+      src={`https://midfield.mlbstatic.com/v1/team/${id}/spots/88`}
+      alt={abbrev}
+      title={abbrev}
+      width={28}
+      height={28}
+      style={{ objectFit: 'contain', display: 'block' }}
+      onError={e => {
+        const el = e.currentTarget
+        el.style.display = 'none'
+        if (el.nextSibling) (el.nextSibling as HTMLElement).style.display = 'inline'
+      }}
+    />
+  )
+}
+
 interface Entry {
   mlbam_id?: number
   player_name: string
@@ -62,14 +116,21 @@ export default function LeaderboardTable({ data, visibleStats, sortBy, order, on
           </tr>
         </thead>
         <tbody>
-          {data.map((entry, i) => (
+          {data.map((entry, i) => {
+            const rank = rankOffset + i + 1
+            const accentColor = rank === 1 ? '#b8922a' : rank === 2 ? '#8a9ba8' : rank === 3 ? '#a0673a' : 'transparent'
+            return (
             <tr
               key={entry.mlbam_id ?? i}
-              style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.1s' }}
+              style={{
+                borderBottom: '1px solid var(--border)',
+                borderLeft: `3px solid ${accentColor}`,
+                transition: 'background 0.1s',
+              }}
               onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,25,80,0.04)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
-              <td style={{ padding: '8px', color: 'var(--text3)', fontSize: 12 }}>{rankOffset + i + 1}</td>
+              <td style={{ padding: '8px', color: 'var(--text3)', fontSize: 12 }}>{rank}</td>
               <td style={{ padding: '8px' }}>
                 <div className="flex items-center gap-2">
                   {entry.headshot_url && entry.mlbam_id && (
@@ -94,7 +155,10 @@ export default function LeaderboardTable({ data, visibleStats, sortBy, order, on
                   )}
                 </div>
               </td>
-              <td style={{ padding: '8px', color: 'var(--text3)', fontSize: 12 }}>{entry.team ?? '—'}</td>
+              <td style={{ padding: '8px 10px' }}>
+                <TeamLogo abbrev={entry.team ?? ''} />
+                <span style={{ display: 'none', fontSize: 11, color: 'var(--text3)' }}>{entry.team}</span>
+              </td>
               {visibleStats.map(k => (
                 <td
                   key={k}
@@ -104,13 +168,15 @@ export default function LeaderboardTable({ data, visibleStats, sortBy, order, on
                     fontFamily: "'DM Mono', monospace",
                     color: sortBy === k ? 'var(--accent2)' : 'var(--text)',
                     fontSize: 12,
+                    background: sortBy === k ? 'rgba(0,31,91,0.03)' : 'transparent',
                   }}
                 >
                   {formatStat(k, entry.stats[k] as number)}
                 </td>
               ))}
             </tr>
-          ))}
+            )
+          })}
         </tbody>
       </table>
     </div>
