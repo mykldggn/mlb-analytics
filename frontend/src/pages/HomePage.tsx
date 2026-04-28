@@ -2,6 +2,10 @@ import { Link } from 'react-router-dom'
 import { useBattingLeaderboard, usePitchingLeaderboard } from '../hooks/useLeaderboard'
 import { LATEST_SEASON } from '../utils/constants'
 const CURRENT_SEASON = LATEST_SEASON
+// Early-season thresholds scale down for the current in-progress year
+const MIN_PA = CURRENT_SEASON === LATEST_SEASON ? 30 : 100
+const MIN_IP = CURRENT_SEASON === LATEST_SEASON ? 15 : 50
+const MIN_IP_K = CURRENT_SEASON === LATEST_SEASON ? 10 : 30
 import { formatStat } from '../utils/formatters'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { useRef } from 'react'
@@ -383,15 +387,15 @@ function StatCrawler({ items }: { items: { label: string; val: string }[] }) {
 }
 
 export default function HomePage() {
-  const { data: hrLeaders }   = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'hr',   order: 'desc', min_pa: 50,  page_size: 5 })
-  const { data: warHitters }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'war',  order: 'desc', min_pa: 100, page_size: 5 })
-  const { data: eraLeaders }  = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'fip', order: 'asc',  min_ip: 50,  page_size: 5 })
-  const { data: avgLeaders }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'avg',  order: 'desc', min_pa: 100, page_size: 1 })
-  const { data: wrcLeaders }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'wrc_plus', order: 'desc', min_pa: 100, page_size: 1 })
-  const { data: rbiLeaders }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'rbi',  order: 'desc', min_pa: 50,  page_size: 1 })
-  const { data: sbLeaders }   = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'sb',   order: 'desc', min_pa: 50,  page_size: 1 })
-  const { data: kLeaders }    = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'k_per_9', order: 'desc', min_ip: 30, page_size: 1 })
-  const { data: eraLow }      = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'era', order: 'asc',  min_ip: 50,  page_size: 1 })
+  const { data: hrLeaders }   = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'hr',      order: 'desc', min_pa: MIN_PA,   page_size: 5 })
+  const { data: warHitters }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'war',     order: 'desc', min_pa: MIN_PA,   page_size: 5 })
+  const { data: eraLeaders }  = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'fip',   order: 'asc',  min_ip: MIN_IP,   page_size: 5 })
+  const { data: avgLeaders }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'avg',     order: 'desc', min_pa: MIN_PA,   page_size: 1 })
+  const { data: wrcLeaders }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'wrc_plus',order: 'desc', min_pa: MIN_PA,   page_size: 1 })
+  const { data: rbiLeaders }  = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'rbi',     order: 'desc', min_pa: MIN_PA,   page_size: 1 })
+  const { data: sbLeaders }   = useBattingLeaderboard(CURRENT_SEASON, { sort_by: 'sb',      order: 'desc', min_pa: MIN_PA,   page_size: 1 })
+  const { data: kLeaders }    = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'k_per_9',order: 'desc', min_ip: MIN_IP_K, page_size: 1 })
+  const { data: eraLow }      = usePitchingLeaderboard(CURRENT_SEASON, { sort_by: 'era',    order: 'asc',  min_ip: MIN_IP,   page_size: 1 })
 
   type D = Record<string, unknown>
   const top = (d: typeof hrLeaders) => d?.data?.[0] as D | undefined

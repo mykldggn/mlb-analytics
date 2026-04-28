@@ -141,7 +141,7 @@ export default function ScoresTicker() {
 
   return (
     <div style={{
-      background: 'var(--bg2)',
+      background: 'var(--bg)',
       borderBottom: '1px solid var(--border)',
       overflow: 'hidden',
       height: 64,
