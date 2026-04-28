@@ -10,8 +10,8 @@ export default function AppLayout() {
     <div className="min-h-screen flex flex-col" style={{ color: 'var(--text)' }}>
       <Navbar />
       <ScoresTicker />
-      <main className="flex-1 container mx-auto px-4 pt-4 pb-6 max-w-7xl">
-        <div key={location.pathname} className="animate-page-enter">
+      <main className="flex-1 container mx-auto px-4 pb-6 max-w-7xl" style={{ paddingTop: 0 }}>
+        <div key={location.pathname} className="animate-page-enter pt-5">
           <Outlet />
         </div>
       </main>
