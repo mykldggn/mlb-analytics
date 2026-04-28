@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { get } from '../../api/client'
 
 interface GameTeam {
   id: number
@@ -105,9 +106,7 @@ export default function ScoresTicker() {
 
   async function fetchGames() {
     try {
-      const res = await fetch('/api/v1/games/today')
-      if (!res.ok) return
-      const data = await res.json()
+      const data = await get<{ games: Game[] }>('/games/today')
       setGames(data.games ?? [])
     } catch {
       // silently fail — ticker is non-critical
