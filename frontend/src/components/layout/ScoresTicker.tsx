@@ -36,7 +36,7 @@ function GameCard({ game }: { game: Game }) {
       display: 'flex',
       alignItems: 'center',
       gap: 8,
-      padding: '0 14px',
+      padding: '0 16px',
       borderRight: '1px solid var(--border)',
       flexShrink: 0,
       height: '100%',
@@ -152,7 +152,7 @@ export default function ScoresTicker() {
         display: 'flex',
         alignItems: 'stretch',
         minWidth: 'max-content',
-        height: 52,
+        height: 64,
       }}>
         {/* "TODAY" label */}
         <div style={{
