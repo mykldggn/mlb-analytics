@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useBattingLeaderboard, usePitchingLeaderboard } from '../hooks/useLeaderboard'
-import { CURRENT_SEASON } from '../utils/constants'
+import { LATEST_SEASON } from '../utils/constants'
+const CURRENT_SEASON = LATEST_SEASON
 import { formatStat } from '../utils/formatters'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { useRef } from 'react'

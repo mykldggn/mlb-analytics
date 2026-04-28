@@ -148,12 +148,16 @@ export default function ScoresTicker() {
       scrollbarWidth: 'none',
       msOverflowStyle: 'none',
       height: 64,
+      flexShrink: 0,
+      display: 'block',
+      fontSize: 0,
     }}>
       <div style={{
         display: 'flex',
         alignItems: 'stretch',
         minWidth: 'max-content',
-        height: '100%',
+        height: 64,
+        fontSize: 'initial',
       }}>
         {/* "TODAY" label */}
         <div style={{
