@@ -415,7 +415,7 @@ export default function HomePage() {
   ].filter(Boolean) as { label: string; val: string }[]
 
   return (
-    <div>
+    <div style={{ marginTop: 'calc(-1.5rem)' }}>
 
       {/* ── Hero — full bleed, escapes the AppLayout container ───────────── */}
       <section style={{
