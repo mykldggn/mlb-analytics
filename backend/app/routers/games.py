@@ -29,9 +29,17 @@ def _et_label(game_date_str: str) -> str:
         return ""
 
 
+def _et_today() -> str:
+    """Return today's date in Eastern Time (UTC-4 during EDT, UTC-5 EST).
+    MLB season runs Mar–Nov, all in EDT (UTC-4), so -4 is always correct in-season."""
+    now_utc = datetime.now(tz=timezone.utc)
+    et = now_utc + timedelta(hours=-4)
+    return et.date().isoformat()
+
+
 @router.get("/today")
 async def get_today_games():
-    today = date.today().isoformat()
+    today = _et_today()
     now = datetime.now(tz=timezone.utc).timestamp()
 
     cached = _cache.get("today")
