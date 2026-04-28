@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.core import player_id_map
-from app.routers import batting, comparison, contract_value, jobs, leaderboards, park_factors, pitching, players, search, teams
+from app.routers import batting, comparison, contract_value, games, jobs, leaderboards, park_factors, pitching, players, search, teams
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -112,6 +112,7 @@ app.include_router(teams.router,       prefix=PREFIX)
 app.include_router(search.router,        prefix=PREFIX)
 app.include_router(jobs.router,          prefix=PREFIX)
 app.include_router(contract_value.router, prefix=PREFIX)
+app.include_router(games.router,          prefix=PREFIX)
 
 
 @app.get("/health")

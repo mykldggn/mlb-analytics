@@ -1,8 +1,9 @@
-export const CURRENT_SEASON = 2025
+export const CURRENT_SEASON = 2025  // default for stats pages (last complete season)
+export const LATEST_SEASON = 2026   // current calendar year (in-progress)
 // FanGraphs data is available back to ~2002 (reliable advanced stats); Statcast back to 2015.
 // Career WAR and traditional stats go back further via pybaseball.
-export const SEASONS = Array.from({ length: CURRENT_SEASON - 2001 }, (_, i) => CURRENT_SEASON - i)
-export const SEASONS_STATCAST = Array.from({ length: CURRENT_SEASON - 2014 }, (_, i) => CURRENT_SEASON - i)
+export const SEASONS = [LATEST_SEASON, ...Array.from({ length: CURRENT_SEASON - 2001 }, (_, i) => CURRENT_SEASON - i)]
+export const SEASONS_STATCAST = [LATEST_SEASON, ...Array.from({ length: CURRENT_SEASON - 2014 }, (_, i) => CURRENT_SEASON - i)]
 
 export const BARREL_EV_THRESHOLD = 98
 export const BARREL_LA_MIN = 8
