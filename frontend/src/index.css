@@ -37,7 +37,6 @@
       transparent 0px, transparent 32px,
       rgba(0, 31, 91, 0.055) 32px, rgba(0, 31, 91, 0.055) 33.5px
     );
-    background-attachment: fixed;
   }
 
   * {
