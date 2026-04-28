@@ -121,7 +121,8 @@ export default function ScoresTicker() {
 
   async function fetchGames() {
     try {
-      const data = await get<{ games: Game[] }>('/games/today')
+      const today = new Date().toLocaleDateString('en-CA') // YYYY-MM-DD in local timezone
+      const data = await get<{ games: Game[] }>('/games/today', { date: today })
       setGames(data.games ?? [])
     } catch {
       // silently fail — ticker is non-critical

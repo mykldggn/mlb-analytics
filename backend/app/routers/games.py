@@ -4,7 +4,8 @@ import logging
 from datetime import date, datetime, timezone, timedelta
 
 import httpx
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/games", tags=["games"])
@@ -38,8 +39,8 @@ def _et_today() -> str:
 
 
 @router.get("/today")
-async def get_today_games():
-    today = _et_today()
+async def get_today_games(date: Optional[str] = Query(default=None)):
+    today = date or _et_today()
     now = datetime.now(tz=timezone.utc).timestamp()
 
     cached = _cache.get("today")
