@@ -179,18 +179,18 @@ const SZ = 40
 function IconPlayerProfiles() {
   return (
     <svg viewBox="0 0 40 40" width={SZ} height={SZ} fill="none" strokeLinecap="round" strokeLinejoin="round">
-      {/* head */}
-      <circle cx="20" cy="13" r="5.5" stroke={N} strokeWidth="2" />
-      {/* baseball cap dome over upper half of head */}
-      <path d="M14 12 Q20 3 26 12" stroke={N} strokeWidth="1.8" fill={N} fillOpacity="0.09" />
-      {/* cap brim */}
-      <line x1="13" y1="12" x2="28" y2="12" stroke={N} strokeWidth="1.8" />
-      {/* bill extending right */}
-      <path d="M27 12 L32 12 Q33.5 12 33 14.5" stroke={N} strokeWidth="1.8" />
-      {/* body */}
-      <path d="M8 36c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke={N} strokeWidth="2" />
-      {/* red accent underline */}
-      <line x1="8" y1="38" x2="32" y2="38" stroke={R} strokeWidth="2.5" />
+      {/* baseball — top half of icon */}
+      <circle cx="20" cy="13" r="8" stroke={N} strokeWidth="2" fill={N} fillOpacity="0.07" />
+      {/* lace stitches left */}
+      <path d="M14.5 9.5 Q13 11 13 13 Q13 15 14.5 16.5" stroke={R} strokeWidth="1.4" fill="none" />
+      {/* lace stitches right */}
+      <path d="M25.5 9.5 Q27 11 27 13 Q27 15 25.5 16.5" stroke={R} strokeWidth="1.4" fill="none" />
+      {/* horizontal seam line */}
+      <line x1="12" y1="13" x2="28" y2="13" stroke={N} strokeWidth="1" strokeOpacity="0.3" />
+      {/* body silhouette */}
+      <path d="M7 38 C7 30 11 26 20 26 C29 26 33 30 33 38" stroke={N} strokeWidth="2" fill={N} fillOpacity="0.07" />
+      {/* red accent bar */}
+      <line x1="7" y1="38" x2="33" y2="38" stroke={R} strokeWidth="2.5" />
     </svg>
   )
 }
