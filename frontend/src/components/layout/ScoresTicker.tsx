@@ -147,6 +147,8 @@ export default function ScoresTicker() {
       overflowY: 'hidden',
       scrollbarWidth: 'none',
       msOverflowStyle: 'none',
+      height: 64,
+      lineHeight: 0,
     }}>
       <div style={{
         display: 'flex',
