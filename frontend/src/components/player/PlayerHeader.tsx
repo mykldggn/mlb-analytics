@@ -59,15 +59,32 @@ export default function PlayerHeader({ player }: Props) {
 
         {/* Team logo */}
         {teamId && (
-          <div className="shrink-0 flex items-center self-center">
+          <div className="shrink-0 self-center" style={{
+            width: 76,
+            height: 76,
+            borderRadius: 12,
+            background: `linear-gradient(135deg, ${colors.primary}22, ${colors.secondary}18)`,
+            border: `1px solid ${colors.primary}30`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
             <img
-              src={`https://midfield.mlbstatic.com/v1/team/${teamId}/spots/88`}
+              src={`https://www.mlbstatic.com/team-logos/team-cap-on-dark/${teamId}.svg`}
               alt={teamAbbr}
               title={teamAbbr}
-              width={80}
-              height={80}
+              width={56}
+              height={56}
               style={{ objectFit: 'contain', display: 'block' }}
-              onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+              onError={e => {
+                // fallback to spots raster
+                const img = e.currentTarget as HTMLImageElement
+                if (!img.src.includes('spots')) {
+                  img.src = `https://midfield.mlbstatic.com/v1/team/${teamId}/spots/88`
+                } else {
+                  img.style.display = 'none'
+                }
+              }}
             />
           </div>
         )}

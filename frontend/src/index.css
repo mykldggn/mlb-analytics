@@ -47,6 +47,9 @@
   *::-webkit-scrollbar-track { background: var(--bg2); }
   *::-webkit-scrollbar-thumb { background-color: var(--border2); border-radius: 3px; }
 
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
   button, input, select, textarea { font-family: inherit; }
 }
 

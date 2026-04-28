@@ -140,22 +140,19 @@ export default function ScoresTicker() {
   if (loading || games.length === 0) return null
 
   return (
-    <div style={{
+    <div className="no-scrollbar" style={{
       background: 'var(--bg)',
       borderBottom: '1px solid var(--border2)',
-      overflow: 'hidden',
       height: 64,
       flexShrink: 0,
+      overflowX: 'auto',
+      overflowY: 'hidden',
     }}>
       <div style={{
         display: 'flex',
         alignItems: 'stretch',
         minWidth: 'max-content',
         height: '100%',
-        overflowX: 'auto',
-        overflowY: 'hidden',
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
       }}>
         {/* "TODAY" label */}
         <div style={{
